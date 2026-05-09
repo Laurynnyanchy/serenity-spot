@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serenity Spot &mdash; Premium Kisii AirBnB </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── HERO ── */
+.hero {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden; padding-top:var(--nav-h);
+}
+.hero-bg {
+  position:absolute; inset:0; z-index:0;
+  background:linear-gradient(145deg, #120d04 0%, #3a2510 45%, #5c3d18 100%);
+}
+.hero-photo {
+  position:absolute; inset:0; z-index:0;
+  background-image:url('https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1800&q=80');
+  background-size:cover; background-position:center;
+  opacity:0.35;
+}
+.hero-overlay {
+  position:absolute; inset:0; z-index:1;
+  background:linear-gradient(to bottom, rgba(26,18,8,.7) 0%, rgba(26,18,8,.5) 60%, rgba(26,18,8,.8) 100%);
+}
+.hero-glow { position:absolute; inset:0; z-index:1; background:radial-gradient(ellipse at 25% 60%, rgba(200,151,58,.15) 0%, transparent 55%); }
+
+.hero-content { position:relative; z-index:2; text-align:center; max-width:760px; padding:40px 20px; }
+
+.eyebrow {
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(200,151,58,.14); border:1px solid rgba(200,151,58,.3);
+  border-radius:40px; padding:6px 18px;
+  color:var(--gold-light); font-size:.76rem; font-weight:600;
+  letter-spacing:1.2px; text-transform:uppercase; margin-bottom:24px;
+  animation:fadeUp .7s .1s both;
+}
+.hero h1 {
+  font-family:'Playfair Display',serif; font-size:clamp(2.6rem,7vw,5rem);
+  font-weight:700; line-height:1.1; color:#fff; margin-bottom:20px;
+  animation:fadeUp .7s .2s both;
+}
+.hero h1 em { color:var(--gold-light); font-style:normal; }
+.hero-sub { color:rgba(255,255,255,.7); font-size:1.05rem; font-weight:300; line-height:1.75; margin-bottom:44px; animation:fadeUp .7s .3s both; }
+
+/* Search box */
+.search-box {
+  background:#fff; border-radius:20px; padding:8px;
+  display:flex; align-items:stretch; gap:0;
+  box-shadow:var(--shadow-lg); overflow:hidden;
+  animation:fadeUp .7s .4s both;
+}
+.s-field {
+  flex:1; display:flex; flex-direction:column;
+  padding:10px 18px; min-width:120px; cursor:pointer;
+  transition:background .2s; border-radius:14px;
+}
+.s-field:hover { background:var(--cream); }
+.s-field label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:4px; cursor:pointer; }
+.s-field input, .s-field select {
+  border:none; outline:none; background:transparent;
+  font-size:.95rem; font-weight:500; color:var(--dark);
+  font-family:'DM Sans',sans-serif;
+}
+.s-div { width:1px; background:var(--border); margin:8px 0; align-self:stretch; }
+.s-btn {
+  background:var(--gold); color:#fff; border:none;
+  border-radius:14px; padding:0 28px; font-weight:700;
+  font-size:.95rem; cursor:pointer; display:flex;
+  align-items:center; gap:8px; white-space:nowrap;
+  transition:all .22s; min-width:140px; justify-content:center;
+}
+.s-btn:hover { background:#b5832a; }
+
+/* scroll hint */
+.scroll-hint {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  color:rgba(255,255,255,.35); font-size:.72rem; letter-spacing:1.5px;
+  text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:6px;
+  animation:bob 2.4s ease-in-out infinite; z-index:2;
+}
+.scroll-hint::after { content:'↓'; font-size:1rem; }
+@keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── FEATURED ROOMS ── */
+.rooms-section { padding:100px 5%; background:var(--white); }
+.rooms-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:28px; }
+.view-all-wrap { text-align:center; margin-top:52px; }
+
+/* ── WHY US ── */
+.why-section { padding:100px 5%; background:var(--cream); }
+.why-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:24px; }
+.why-card {
+  background:var(--white); border-radius:var(--radius); padding:32px 24px;
+  border:1px solid var(--border); text-align:center; transition:all .28s;
+}
+.why-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-md); }
+.why-icon {
+  width:64px; height:64px; border-radius:50%;
+  background:linear-gradient(135deg,rgba(200,151,58,.14),rgba(200,151,58,.06));
+  border:1px solid rgba(200,151,58,.22);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--gold);
+  margin:0 auto 18px;
+}
+.why-card h3 { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--dark); margin-bottom:8px; }
+.why-card p { font-size:.875rem; color:var(--muted); line-height:1.65; }
+
+/* ── TESTIMONIAL STRIP ── */
+.testi-strip { background:var(--dark); padding:72px 5%; }
+.testi-strip .s-title { color:#fff; text-align:center; }
+.testi-strip .s-tag { text-align:center; display:block; margin-bottom:12px; }
+.testi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:24px; margin-top:48px; }
+.testi-card {
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius); padding:28px;
+}
+.testi-stars { color:var(--gold); margin-bottom:12px; display:flex; gap:2px; }
+.testi-text { color:rgba(255,255,255,.72); font-size:.9rem; line-height:1.7; margin-bottom:18px; font-style:italic; }
+.testi-author { color:rgba(255,255,255,.45); font-size:.78rem; font-weight:600; text-transform:uppercase; letter-spacing:.8px; }
+
+/* ── LOCATION STRIP ── */
+.location-strip { padding:80px 5%; background:var(--white); }
+.location-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; max-width:1100px; margin:0 auto; }
+.location-img { border-radius:var(--radius); overflow:hidden; height:420px; }
+.location-img img { width:100%; height:100%; object-fit:cover; }
+.location-text .s-tag { margin-bottom:12px; }
+.location-feature { display:flex; align-items:center; gap:10px; font-size:.9rem; color:var(--text); margin-top:12px; }
+.location-feature .dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+
+@media(max-width:800px){
+  .location-grid { grid-template-columns:1fr; }
+  .location-img { height:260px; }
+}
+@media(max-width:700px){
+  .search-box { flex-direction:column; border-radius:16px; gap:4px; }
+  .s-div { display:none; }
+  .s-btn { border-radius:12px; padding:14px; }
+  .s-field { border-radius:10px; }
+}
+</style>
+</head>
+<body>
+<div id="nav-slot"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-photo"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="eyebrow">&#10022; Premium Accommodation &middot; Kisii, Kenya</div>
+    <h1>Find Your <em>Perfect</em><br>Stay</h1>
+    <p class="hero-sub">Comfortable, clean and affordable rooms in the heart of Kisii.<br>Book in minutes &mdash; no hidden fees.</p>
+
+    <div class="search-box">
+      <div class="s-field">
+        <label for="checkin">Check-in</label>
+        <input type="date" id="checkin">
+      </div>
+      <div class="s-div"></div>
+      <div class="s-field">
+        <label for="checkout">Check-out</label>
+        <input type="date" id="checkout">
+      </div>
+      <div class="s-div"></div>
+      <div class="s-field">
+        <label for="guests">Guests</label>
+        <select id="guests">
+          <option>1 Guest</option><option>2 Guests</option>
+          <option>3 Guests</option><option>4 Guests</option>
+          <option>5+ Guests</option>
+        </select>
+      </div>
+      <button class="s-btn" onclick="doSearch()">
+        <span id="searchIcon"></span> Search
+      </button>
+    </div>
+  </div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- FEATURED ROOMS -->
+<section class="rooms-section" id="rooms">
+  <div class="s-head">
+    <div class="s-tag">Featured Rooms</div>
+    <h2 class="s-title">Handpicked Accommodation</h2>
+    <p class="s-sub">From cozy studios to spacious family suites &mdash; a room for every need</p>
+  </div>
+  <div class="rooms-grid" id="featuredGrid"></div>
+  <div class="view-all-wrap">
+    <a href="rooms.html" class="btn btn-primary btn-lg">View All Rooms</a>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why-section">
+  <div class="s-head">
+    <div class="s-tag">Why Choose Us</div>
+    <h2 class="s-title">The Serenity Spot Difference</h2>
+    <p class="s-sub">More than just a place to sleep</p>
+  </div>
+  <div class="why-grid" id="whyGrid"></div>
+</section>
+
+<!-- LOCATION -->
+<section class="location-strip">
+  <div class="location-grid">
+    <div class="location-img">
+      <img src="https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&q=80" alt="Nakuru Kenya" loading="lazy">
+    </div>
+    <div class="location-text">
+      <div class="s-tag">Our Location</div>
+      <h2 class="s-title" style="margin-bottom:16px">Heart of<br>kisii </h2>
+      <p style="color:var(--muted);line-height:1.8;margin-bottom:20px">Ideally situated just minutes from Kisii's vibrant town centre, with easy access to restaurants, shops, and all major attractions.</p>
+      <div class="location-feature"><div class="dot"></div>5 min to Kisii CBD</div>
+      <div class="location-feature"><div class="dot"></div>Safe, well-lit neighbourhood</div>
+      <div style="margin-top:24px">
+        <a href="contact.html" class="btn btn-primary">Get Directions</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-strip">
+  <div class="s-tag">Guest Reviews</div>
+  <h2 class="s-title">Loved by Our Guests</h2>
+  <div class="testi-grid" id="testiGrid"></div>
+</section>
+
+<div id="footer-slot"></div>
+<script src="shared.js"></script>
+<script>
+document.getElementById('nav-slot').innerHTML = navHTML('home');
+document.getElementById('footer-slot').innerHTML = footerHTML();
+sharedInit();
+
+// Set search icon
+document.getElementById('searchIcon').innerHTML = ICONS.search;
+
+// Set default dates
+const today = new Date();
+const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+const d2 = new Date(today); d2.setDate(today.getDate()+2);
+document.getElementById('checkin').value = tomorrow.toISOString().split('T')[0];
+document.getElementById('checkout').value = d2.toISOString().split('T')[0];
+
+function doSearch(){
+  const ci=document.getElementById('checkin').value;
+  const co=document.getElementById('checkout').value;
+  const g=document.getElementById('guests').value;
+  window.location=`rooms.html?checkin=${ci}&checkout=${co}&guests=${g}`;
+}
+
+// Featured rooms
+document.getElementById('featuredGrid').innerHTML = ROOMS.slice(0,3).map(r=>`
+  <div class="room-card">
+    <div class="card-img-wrap">
+      <img class="room-card-img" src="${r.image}" alt="${r.name}" loading="lazy">
+      ${r.badge?`<div class="card-badge">${r.badge}</div>`:''}
+    </div>
+    <div class="card-body">
+      <div class="card-type">${r.type}</div>
+      <div class="card-name">${r.name}</div>
+      <div class="card-desc">${r.desc}</div>
+      <div class="card-meta">
+        <span>${ICONS.users} Up to ${r.people} guests</span>
+        <span class="rating-wrap">${renderStars(r.rating)} <span style="margin-left:4px">${r.rating} (${r.reviews})</span></span>
+      </div>
+      <div class="card-footer">
+        <div class="card-price">
+          <span class="amount">${formatKES(r.price)}</span>
+          <span class="per"> / night</span>
+        </div>
+        <a href="room_detail.html?id=${r.id}" class="btn btn-outline btn-sm">View Details</a>
+      </div>
+    </div>
+  </div>
+`).join('');
+
+// Why us
+const whyItems = [
+  {icon:ICONS.money, title:'Affordable Rates', desc:'Competitive pricing with no hidden charges. Best rates guaranteed when you book direct.'},
+  {icon:ICONS.shield, title:'Secure Payments', desc:'M-Pesa STK push and card payments &mdash; safe, fast and confirmed instantly.'},
+  {icon:ICONS.sparkle, title:'Spotlessly Clean', desc:'Every room professionally cleaned and inspected before your arrival, always.'},
+  {icon:ICONS.mappin, title:'Prime Location', desc:'Minutes from Kisii town centre, restaurants and major attractions.'},
+  {icon:ICONS.wifi, title:'Fast WiFi', desc:'High-speed fibre internet in every room &mdash; work remotely or stream without limits.'},
+  {icon:ICONS.verified, title:'Verified Reviews', desc:'100% real guest reviews so you know exactly what to expect before you book.'},
+];
+document.getElementById('whyGrid').innerHTML = whyItems.map(w=>`
+  <div class="why-card">
+    <div class="why-icon">${w.icon}</div>
+    <h3>${w.title}</h3>
+    <p>${w.desc}</p>
+  </div>
+`).join('');
+
+// Testimonials
+const testis = [
+  {stars:5, text:'Absolutely loved the Garden Suite. Clean, quiet and the WiFi was fast. Will definitely be back!', author:'Amina W., Nairobi'},
+  {stars:5, text:'Best value AirBnB in Kisii. The Family Apartment fit all four of us comfortably. Kitchen was fully stocked.', author:'James K., Mombasa'},
+  {stars:4, text:'Paid via M-Pesa and got instant confirmation. Check-in was smooth and the host was very responsive.', author:'Grace M., Eldoret'},
+];
+document.getElementById('testiGrid').innerHTML = testis.map(t=>`
+  <div class="testi-card">
+    <div class="testi-stars">${Array(t.stars).fill(ICONS.star).join('')}</div>
+    <p class="testi-text">"${t.text}"</p>
+    <div class="testi-author">&mdash; ${t.author}</div>
+  </div>
+`).join('');
+</script>
+</body>
+</html>

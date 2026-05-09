@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard &mdash; Serenity Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C8973A;--gold-light:#E8B85A;--gold-pale:rgba(200,151,58,.1);
+  --dark:#1A1208;--text:#3D2E14;--muted:#7A6645;
+  --white:#fff;--cream:#F9F4EC;--border:#E8DCC8;
+  --sidebar-bg:#151008;--sidebar-border:rgba(255,255,255,.07);
+  --success:#2A7A50;--error:#C0392B;--info:#1B5FAB;
+  --shadow:0 4px 24px rgba(26,18,8,.10);--shadow-md:0 8px 32px rgba(26,18,8,.13);
+  --radius:14px;--radius-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:240px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s;}
+.sb-logo{padding:22px 20px;border-bottom:1px solid var(--sidebar-border);}
+.sb-logo .logo-text{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:#fff;}
+.sb-logo .logo-text span{color:var(--gold-light);}
+.sb-logo p{font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
+.sb-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.sb-section{font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.22);padding:16px 20px 6px;font-weight:700;}
+.sb-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.5);font-size:.875rem;font-weight:500;cursor:pointer;transition:all .2s;border:none;background:none;width:100%;text-align:left;border-left:3px solid transparent;}
+.sb-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);}
+.sb-item.active{background:rgba(200,151,58,.12);color:var(--gold-light);border-left:3px solid var(--gold);}
+.sb-item .ico{width:18px;display:flex;justify-content:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--gold);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px;}
+.sb-footer{padding:16px 20px;border-top:1px solid var(--sidebar-border);}
+.sb-user{display:flex;align-items:center;gap:10px;}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b5832a);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.85rem;flex-shrink:0;}
+.sb-user-info p{font-size:.82rem;color:#fff;font-weight:600;}
+.sb-user-info span{font-size:.68rem;color:rgba(255,255,255,.35);}
+.sb-logout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;transition:color .2s;display:flex;align-items:center;}
+.sb-logout:hover{color:rgba(255,255,255,.7);}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;}
+.sb-overlay.open{display:block;}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{height:64px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--dark);}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.notif-btn{background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;padding:6px;position:relative;}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--error);border:2px solid var(--white);}
+.mob-menu-btn{display:none;background:none;border:none;color:var(--dark);cursor:pointer;}
+.content{padding:28px 32px;flex:1;}
+.panel{display:none;} .panel.active{display:block;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all .25s;position:relative;overflow:hidden;cursor:pointer;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold);}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.stat-card .ico{font-size:1.4rem;margin-bottom:12px;}
+.stat-card .val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--dark);margin-bottom:4px;line-height:1;}
+.stat-card .lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+.stat-card .chg{font-size:.72rem;margin-top:8px;}
+.chg.up{color:var(--success);} .chg.dn{color:var(--error);}
+
+/* TABLE */
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:24px;}
+.tc-head{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+.tc-head h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--dark);}
+.tc-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.filter-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.filter-btn.active,.filter-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-pale);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--cream);padding:11px 16px;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:12px 16px;font-size:.865rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr{cursor:pointer;transition:background .15s;}
+tbody tr:hover td{background:var(--cream);}
+.td-id{font-weight:700;color:var(--gold);font-size:.82rem;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;}
+.b-green{background:#e8f8ee;color:var(--success);}
+.b-gold{background:var(--gold-pale);color:var(--gold);}
+.b-red{background:#fde8e8;color:var(--error);}
+.b-blue{background:#e8f0fb;color:var(--info);}
+.b-gray{background:rgba(122,102,69,.1);color:var(--muted);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:40px;font-weight:600;font-size:.82rem;transition:all .2s;border:none;cursor:pointer;padding:7px 16px;font-family:'DM Sans',sans-serif;}
+.btn-primary{background:var(--gold);color:#fff;}
+.btn-primary:hover{background:#b5832a;}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-danger{background:transparent;border:1.5px solid var(--error);color:var(--error);}
+.btn-danger:hover{background:var(--error);color:#fff;}
+.btn-success{background:transparent;border:1.5px solid var(--success);color:var(--success);}
+.btn-success:hover{background:var(--success);color:#fff;}
+.btn-sm{padding:5px 12px;font-size:.73rem;}
+
+/* ROOMS */
+.rooms-mgmt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+.rmc{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .25s;cursor:pointer;}
+.rmc:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+.rmc-img{height:160px;position:relative;overflow:hidden;}
+.rmc-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+.rmc:hover .rmc-img img{transform:scale(1.05);}
+.rmc-avail{position:absolute;top:10px;right:10px;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:10px;}
+.rmc-body{padding:16px;}
+.rmc-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--dark);margin-bottom:4px;}
+.rmc-type{font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px;}
+.rmc-meta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:12px;}
+.rmc-price{font-weight:700;color:var(--dark);}
+.rmc-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* REVIEW / MESSAGE CARDS */
+.rev-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;cursor:pointer;transition:all .2s;}
+.rev-card:hover{box-shadow:var(--shadow);transform:translateX(3px);}
+.msg-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:12px;cursor:pointer;transition:all .2s;}
+.msg-card.unread{border-left:4px solid var(--gold);}
+.msg-card:hover{box-shadow:var(--shadow);transform:translateX(3px);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding:48px 16px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:20px;padding:32px;width:90%;max-width:580px;position:relative;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--dark);margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;padding:4px;}
+.modal-close:hover{color:var(--dark);}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.form-group label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+.form-control{padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-size:.9rem;color:var(--dark);outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif;width:100%;}
+.form-control:focus{border-color:var(--gold);}
+.two-col-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);font-size:.875rem;}
+.detail-row:last-child{border-bottom:none;}
+.detail-row .key{color:var(--muted);font-size:.73rem;text-transform:uppercase;letter-spacing:.4px;font-weight:700;flex-shrink:0;padding-right:12px;}
+.detail-row .val{font-weight:600;color:var(--dark);text-align:right;}
+
+/* SETTINGS */
+.settings-section{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;}
+.settings-section h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--dark);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.setting-info h4{font-size:.88rem;font-weight:600;color:var(--dark);margin-bottom:2px;}
+.setting-info p{font-size:.78rem;color:var(--muted);}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-track{position:absolute;inset:0;background:var(--border);border-radius:24px;cursor:pointer;transition:.3s;}
+.toggle input:checked+.toggle-track{background:var(--gold);}
+.toggle-track::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+.toggle input:checked+.toggle-track::before{transform:translateX(20px);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:500;background:var(--dark);color:#fff;padding:14px 20px;border-radius:12px;font-size:.875rem;display:none;align-items:center;gap:10px;box-shadow:var(--shadow-md);max-width:340px;}
+.toast.show{display:flex;animation:slideIn .3s ease;}
+.toast.success .t-icon{color:#34a865;}
+.toast.error .t-icon{color:var(--error);}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-state .e-icon{font-size:2rem;margin-bottom:12px;}
+.empty-state h4{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--dark);margin-bottom:6px;}
+
+/* LIVE DOT */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#34a865;display:inline-block;animation:pulse 2s infinite;margin-right:6px;vertical-align:middle;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .mob-menu-btn{display:flex;}
+  .two-col-form{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:520px){
+  .stats-grid{grid-template-columns:1fr;}
+  .content{padding:16px;}
+  .topbar{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="logo-text">Serenity <span>Spot</span></div>
+    <p>Admin Panel</p>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Main</div>
+    <button class="sb-item active" id="nav-dashboard" onclick="showPanel('dashboard',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> Dashboard
+    </button>
+    <button class="sb-item" id="nav-rooms" onclick="showPanel('rooms',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Rooms
+    </button>
+    <button class="sb-item" id="nav-bookings" onclick="showPanel('bookings',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Bookings
+      <span class="sb-badge" id="pendingBadge" style="display:none">0</span>
+    </button>
+    <button class="sb-item" id="nav-payments" onclick="showPanel('payments',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span> Payments
+    </button>
+    <button class="sb-item" id="nav-reviews" onclick="showPanel('reviews',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span> Reviews
+      <span class="sb-badge" id="reviewBadge" style="display:none">0</span>
+    </button>
+    <button class="sb-item" id="nav-messages" onclick="showPanel('messages',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span> Messages
+      <span class="sb-badge" id="msgBadge" style="display:none">0</span>
+    </button>
+    <button class="sb-item" id="nav-guests" onclick="showPanel('guests',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Guests
+    </button>
+    <div class="sb-section">System</div>
+    <button class="sb-item" id="nav-settings" onclick="showPanel('settings',this)">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings
+    </button>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar" id="sbAvatar">A</div>
+      <div class="sb-user-info">
+        <p id="sbName">Admin</p>
+        <span id="sbEmail">Administrator</span>
+      </div>
+      <button class="sb-logout" onclick="doLogout()" title="Logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="mob-menu-btn" onclick="openSidebar()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span style="font-size:.75rem;color:var(--muted)"><span class="live-dot"></span>Live</span>
+      <button class="notif-btn" onclick="showPanel('messages',document.getElementById('nav-messages'))" title="Messages">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot" id="notifDot" style="display:none"></span>
+      </button>
+      <a href="index.html" class="btn btn-ghost btn-sm">&larr; View Site</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="p-dashboard">
+      <div class="stats-grid" id="statsGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Loading dashboard…</div>
+      </div>
+      <div class="table-card">
+        <div class="tc-head">
+          <h3>Recent Bookings</h3>
+          <button class="btn btn-ghost btn-sm" onclick="showPanel('bookings',document.getElementById('nav-bookings'))">View All &rarr;</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody id="recentBookings"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROOMS -->
+    <div class="panel" id="p-rooms">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--dark)">Room Management</h2>
+        <button class="btn btn-primary" onclick="openAddRoom()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Room</button>
+      </div>
+      <div class="rooms-mgmt-grid" id="roomsMgmtGrid"></div>
+    </div>
+
+    <!-- BOOKINGS -->
+    <div class="panel" id="p-bookings">
+      <div class="table-card">
+        <div class="tc-head">
+          <h3>All Bookings</h3>
+          <div class="tc-filters">
+            <button class="filter-btn active" onclick="filterBookings(null,this)">All</button>
+            <button class="filter-btn" onclick="filterBookings('pending',this)">Pending</button>
+            <button class="filter-btn" onclick="filterBookings('confirmed',this)">Confirmed</button>
+            <button class="filter-btn" onclick="filterBookings('cancelled',this)">Cancelled</button>
+            <button class="filter-btn" onclick="filterBookings('completed',this)">Completed</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Nights</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="allBookings"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="panel" id="p-payments">
+      <div class="table-card">
+        <div class="tc-head">
+          <h3>Payment Transactions</h3>
+          <div class="tc-filters">
+            <button class="filter-btn active" onclick="filterPayments(null,this)">All</button>
+            <button class="filter-btn" onclick="filterPayments('confirmed',this)">Paid</button>
+            <button class="filter-btn" onclick="filterPayments('pending',this)">Pending</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Booking ID</th><th>Guest</th><th>Room</th><th>Amount</th><th>Check-in</th><th>Status</th></tr></thead>
+            <tbody id="payTable"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="panel" id="p-reviews">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--dark)">Guest Reviews</h2>
+        <div class="tc-filters">
+          <button class="filter-btn active" onclick="filterReviews(null,this)">All</button>
+          <button class="filter-btn" onclick="filterReviews('pending',this)">Pending</button>
+          <button class="filter-btn" onclick="filterReviews('approved',this)">Approved</button>
+          <button class="filter-btn" onclick="filterReviews('flagged',this)">Flagged</button>
+        </div>
+      </div>
+      <div id="reviewsList"></div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="panel" id="p-messages">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--dark)">Contact Messages</h2>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer">
+            <input type="checkbox" id="unreadOnly" onchange="loadMessages()" style="accent-color:var(--gold)"> Unread only
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+        </div>
+      </div>
+      <div id="messagesList"></div>
+    </div>
+
+    <!-- GUESTS -->
+    <div class="panel" id="p-guests">
+      <div class="table-card">
+        <div class="tc-head">
+          <h3>Registered Guests</h3>
+          <input type="text" placeholder="Search…" oninput="searchGuests(this.value)"
+            style="padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;min-width:180px">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="guestTable"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="p-settings">
+      <div class="settings-section">
+        <h3>Property Information</h3>
+        <div class="two-col-form">
+          <div class="form-group"><label>Property Name</label><input class="form-control" value="Serenity Spot"></div>
+          <div class="form-group"><label>Phone</label><input class="form-control" value="+254 743 788 467"></div>
+          <div class="form-group"><label>Email</label><input class="form-control" value="serenityspotbookings@gmail.com"></div>
+          <div class="form-group"><label>Location</label><input class="form-control" value="Kisii Town, Kenya"></div>
+        </div>
+        <div class="form-group" style="margin-top:6px"><label>WhatsApp Number</label><input class="form-control" value="254743788467"></div>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="toast('Settings saved','success')">Save Changes</button>
+      </div>
+      <div class="settings-section">
+        <h3>Notifications</h3>
+        <div class="setting-row">
+          <div class="setting-info"><h4>New Booking Alerts</h4><p>Notify when a new booking is made</p></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><h4>Payment Confirmations</h4><p>M-Pesa payment confirmation alerts</p></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><h4>Review Notifications</h4><p>Alert when a new review is submitted</p></div>
+          <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Session</h3>
+        <div class="setting-row">
+          <div class="setting-info"><h4>Logged in as</h4><p id="sessionInfo">&mdash;</p></div>
+          <button class="btn btn-danger btn-sm" onclick="doLogout()">Sign Out</button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><h4>Auto-refresh</h4><p>Refresh stats every 30 seconds</p></div>
+          <label class="toggle"><input type="checkbox" id="autoRefreshToggle" checked onchange="toggleAutoRefresh(this.checked)"><span class="toggle-track"></span></label>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ADD/EDIT ROOM MODAL -->
+<div class="modal-overlay" id="addRoomModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="roomModalTitle">Add New Room</span>
+      <button class="modal-close" onclick="closeModal('addRoomModal')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <input type="hidden" id="editRoomId">
+    <div class="two-col-form">
+      <div class="form-group"><label>Room Name</label><input class="form-control" id="mName" placeholder="e.g. Sunset Loft"></div>
+      <div class="form-group"><label>Type</label>
+        <select class="form-control" id="mType"><option>Studio</option><option>1 Bedroom</option><option>2 Bedroom</option><option>3 Bedroom</option><option>Suite</option></select>
+      </div>
+      <div class="form-group"><label>Price / Night (KES)</label><input class="form-control" id="mPrice" type="number" placeholder="3500"></div>
+      <div class="form-group"><label>Max Guests</label><input class="form-control" id="mGuests" type="number" placeholder="2" min="1" max="10"></div>
+    </div>
+    <div class="form-group"><label>Image URL</label><input class="form-control" id="mImg" placeholder="https://images.unsplash.com/…"></div>
+    <div class="form-group"><label>Short Description</label><textarea class="form-control" id="mDesc" style="min-height:70px" placeholder="Brief room description…"></textarea></div>
+    <div class="form-group"><label>Amenities (comma separated)</label><input class="form-control" id="mAmen" placeholder="WiFi, AC, TV, Kitchen"></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-primary" onclick="saveRoom()">Save Room</button>
+      <button class="btn btn-ghost" onclick="closeModal('addRoomModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING DETAIL MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div class="modal-title">Booking Details <button class="modal-close" onclick="closeModal('bookingModal')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div id="bookingModalBody"></div>
+  </div>
+</div>
+
+<!-- REVIEW DETAIL MODAL -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal">
+    <div class="modal-title">Review Details <button class="modal-close" onclick="closeModal('reviewModal')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div id="reviewModalBody"></div>
+  </div>
+</div>
+
+<!-- MESSAGE DETAIL MODAL -->
+<div class="modal-overlay" id="messageModal">
+  <div class="modal">
+    <div class="modal-title">Message Details <button class="modal-close" onclick="closeModal('messageModal')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div id="messageModalBody"></div>
+  </div>
+</div>
+
+<!-- ROOM DETAIL MODAL -->
+<div class="modal-overlay" id="roomModal">
+  <div class="modal">
+    <div class="modal-title">Room Details <button class="modal-close" onclick="closeModal('roomModal')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div id="roomModalBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="adminToast">
+  <span class="t-icon" id="toastIcon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:8000';
+
+/* ── AUTH GUARD ─────────────────────────────────────────────── */
+const token   = localStorage.getItem('ss_token');
+const userStr = localStorage.getItem('ss_user');
+const user    = (() => { try { return JSON.parse(userStr); } catch(e) { return null; } })();
+
+if (!token || !user)            { window.location = 'login.html'; }
+else if (user.role !== 'admin') { window.location = 'index.html'; }
+
+/* ── SESSION INFO ───────────────────────────────────────────── */
+if (user) {
+  const name = user.name || user.email || 'Admin';
+  document.getElementById('sbName').textContent   = name.split(' ')[0];
+  document.getElementById('sbAvatar').textContent = name[0].toUpperCase();
+  document.getElementById('sbEmail').textContent  = user.email || '';
+  document.getElementById('sessionInfo').textContent = `${name} (${user.email || ''})`;
+}
+const authHeaders = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+/* ── HELPERS ────────────────────────────────────────────────── */
+function fmtKES(n)   { return 'KES ' + Number(n || 0).toLocaleString(); }
+function fmtDate(d)  { return d ? new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}) : '&mdash;'; }
+function fmtDT(d)    { return d ? new Date(d).toLocaleString('en-KE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '&mdash;'; }
+
+function badge(s) {
+  const map = { confirmed:'b-green', pending:'b-gold', cancelled:'b-red', completed:'b-blue',
+                paid:'b-green', failed:'b-red', approved:'b-green', flagged:'b-red',
+                admin:'b-gold', guest:'b-gray' };
+  return `<span class="badge ${map[s]||'b-gray'}">${s||'&mdash;'}</span>`;
+}
+
+function safeJSON(obj) {
+  return JSON.stringify(obj).replace(/"/g, '&quot;');
+}
+
+/* ── PANEL SWITCH ───────────────────────────────────────────── */
+const panelTitles = { dashboard:'Dashboard', rooms:'Rooms', bookings:'Bookings',
+                      payments:'Payments', reviews:'Reviews', messages:'Messages',
+                      guests:'Guests', settings:'Settings' };
+
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('topbarTitle').textContent = panelTitles[id] || '';
+  closeSidebar();
+  if (id === 'rooms')    loadRooms();
+  if (id === 'bookings') loadBookings();
+  if (id === 'payments') loadPayments();
+  if (id === 'reviews')  loadReviews();
+  if (id === 'messages') loadMessages();
+  if (id === 'guests')   loadGuests();
+}
+
+/* ── SIDEBAR MOBILE ─────────────────────────────────────────── */
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('sbOverlay').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbOverlay').classList.remove('open'); }
+
+/* ── MODALS ─────────────────────────────────────────────────── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o =>
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
+);
+
+/* ── LOGOUT ─────────────────────────────────────────────────── */
+function doLogout() {
+  localStorage.removeItem('ss_token');
+  localStorage.removeItem('ss_user');
+  window.location = 'login.html';
+}
+
+/* ── TOAST ──────────────────────────────────────────────────── */
+function toast(msg, type = 'success') {
+  const el = document.getElementById('adminToast');
+  document.getElementById('toastMsg').textContent  = msg;
+  document.getElementById('toastIcon').innerHTML = type === 'success' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  el.className = `toast ${type}`;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+/* ── STATS ──────────────────────────────────────────────────── */
+async function loadStats() {
+  try {
+    const r = await fetch(`${API_BASE}/api/admin/stats`, { headers: authHeaders });
+    if (!r.ok) throw new Error('auth');
+    const s = await r.json();
+
+    // Sidebar badges
+    const pb = document.getElementById('pendingBadge');
+    pb.textContent    = s.pending_bookings;
+    pb.style.display  = s.pending_bookings > 0 ? 'inline-flex' : 'none';
+
+    const rv = document.getElementById('reviewBadge');
+    rv.textContent    = s.pending_reviews;
+    rv.style.display  = s.pending_reviews > 0 ? 'inline-flex' : 'none';
+
+    const mb = document.getElementById('msgBadge');
+    mb.textContent    = s.unread_messages;
+    mb.style.display  = s.unread_messages > 0 ? 'inline-flex' : 'none';
+
+    document.getElementById('notifDot').style.display = s.unread_messages > 0 ? 'block' : 'none';
+
+    // Stat cards &mdash; each navigates to relevant panel on click
+    const cards = [
+      { ico:`<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='16' y1='13' x2='8' y2='13'/><line x1='16' y1='17' x2='8' y2='17'/></svg>`, label:'Total Bookings',    val: s.total_bookings,        link:'bookings', chg: s.pending_bookings + ' pending',        up: true },
+      { ico:`<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 11.08V12a10 10 0 1 1-5.93-9.14'/><polyline points='22 4 12 14.01 9 11.01'/></svg>`, label:'Confirmed',         val: s.confirmed,             link:'bookings', chg: 'bookings confirmed',                   up: true },
+      { ico:`<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'/><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/></svg>`, label:'Total Revenue',     val: fmtKES(s.total_revenue), link:'payments', chg: 'from paid bookings',                  up: true },
+      { ico:`<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M23 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>`, label:'Registered Guests', val: s.total_guests,          link:'guests',   chg: 'total registered',                    up: true },
+      { ico:`<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg>`, label:'Available Rooms',   val: s.available_rooms,       link:'rooms',    chg: 'rooms ready',                         up: true },
+      { ico:`<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>`, label:'Pending Reviews',   val: s.pending_reviews,       link:'reviews',  chg: 'need moderation',                     up: s.pending_reviews === 0 },
+      { ico:`<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'/><polyline points='22,6 12,13 2,6'/></svg>`, label:'Unread Messages',  val: s.unread_messages,       link:'messages', chg: 'in inbox',                            up: s.unread_messages === 0 },
+    ];
+
+    document.getElementById('statsGrid').innerHTML = cards.map(c => `
+      <div class="stat-card" onclick="showPanel('${c.link}',document.getElementById('nav-${c.link}'))" title="View ${c.label}">
+        <div class="ico">${c.ico}</div>
+        <div class="val">${c.val}</div>
+        <div class="lbl">${c.label}</div>
+        <div class="chg ${c.up ? 'up' : 'dn'}">${c.chg}</div>
+      </div>
+    `).join('');
+
+    // Recent bookings table
+    const rb = await fetch(`${API_BASE}/api/bookings`, { headers: authHeaders });
+    if (rb.ok) {
+      const bks = await rb.json();
+      document.getElementById('recentBookings').innerHTML = bks.slice(0, 8).map(b => `
+        <tr onclick="openBookingDetail(${safeJSON(b)})">
+          <td class="td-id">${b.id || '&mdash;'}</td>
+          <td>${b.guest_name || '&mdash;'}</td>
+          <td>${b.room_name || '&mdash;'}</td>
+          <td>${fmtDate(b.checkin_date)}</td>
+          <td style="font-weight:700">${fmtKES(b.total_amount)}</td>
+          <td>${badge(b.status)}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No bookings yet</td></tr>';
+    }
+  } catch (e) {
+    if (e.message === 'auth') { toast('Session expired &mdash; please log in again', 'error'); setTimeout(doLogout, 2000); return; }
+    document.getElementById('statsGrid').innerHTML =
+      `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cannot reach API at <strong>${API_BASE}</strong>. Is the backend running?
+       </div>`;
+  }
+}
+
+/* ── ROOMS ──────────────────────────────────────────────────── */
+let rooms = [];
+async function loadRooms() {
+  try { const r = await fetch(`${API_BASE}/api/rooms`); rooms = await r.json(); }
+  catch { rooms = []; }
+  renderRooms();
+}
+
+function renderRooms() {
+  const grid = document.getElementById('roomsMgmtGrid');
+  if (!rooms.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="e-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h4>No rooms yet</h4><p>Click "Add Room" to get started</p></div>`;
+    return;
+  }
+  grid.innerHTML = rooms.map(r => `
+    <div class="rmc" onclick="openRoomDetail(${safeJSON(r)})">
+      <div class="rmc-img">
+        <img src="${r.image_url || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=70'}"
+             alt="${r.name}" onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=70'">
+        <span class="rmc-avail badge ${r.is_available ? 'b-green' : 'b-red'}">${r.is_available ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Available' : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Occupied'}</span>
+      </div>
+      <div class="rmc-body">
+        <div class="rmc-type">${r.type}</div>
+        <div class="rmc-name">${r.name}</div>
+        <div class="rmc-meta">
+          <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Up to ${r.max_people} guests</span>
+          <span class="rmc-price">${fmtKES(r.price)}/night</span>
+        </div>
+        <div class="rmc-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-sm" onclick="openEditRoom(${safeJSON(r)})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+          <button class="btn btn-sm ${r.is_available ? 'btn-danger' : 'btn-success'}" onclick="toggleAvail(${r.id},${r.is_available})">
+            ${r.is_available ? 'Mark Occupied' : 'Mark Available'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openRoomDetail(r) {
+  document.getElementById('roomModalBody').innerHTML = `
+    <img src="${r.image_url || ''}" style="width:100%;height:180px;object-fit:cover;border-radius:10px;margin-bottom:20px" onerror="this.style.display='none'">
+    <div class="detail-row"><span class="key">Name</span><span class="val">${r.name}</span></div>
+    <div class="detail-row"><span class="key">Type</span><span class="val">${r.type}</span></div>
+    <div class="detail-row"><span class="key">Price</span><span class="val" style="color:var(--gold)">${fmtKES(r.price)} / night</span></div>
+    <div class="detail-row"><span class="key">Max Guests</span><span class="val">${r.max_people}</span></div>
+    <div class="detail-row"><span class="key">Rating</span><span class="val">${r.rating || '&mdash;'} &#11088; (${r.review_count || 0} reviews)</span></div>
+    <div class="detail-row"><span class="key">Status</span><span class="val">${r.is_available ? '<span class="badge b-green">Available</span>' : '<span class="badge b-red">Occupied</span>'}</span></div>
+    ${r.description ? `<p style="margin-top:14px;font-size:.875rem;color:var(--muted);line-height:1.7">${r.description}</p>` : ''}
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="closeModal('roomModal');openEditRoom(${safeJSON(r)})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit Room</button>
+      <a href="room_detail.html?id=${r.id}" target="_blank" class="btn btn-ghost btn-sm">&larr; View Site</a>
+      <button class="btn btn-sm ${r.is_available ? 'btn-danger' : 'btn-success'}" onclick="toggleAvail(${r.id},${r.is_available});closeModal('roomModal')">
+        ${r.is_available ? 'Mark Occupied' : 'Mark Available'}
+      </button>
+    </div>
+  `;
+  openModal('roomModal');
+}
+
+async function toggleAvail(id, current) {
+  try {
+    await fetch(`${API_BASE}/api/rooms/${id}`, { method:'PATCH', headers: authHeaders, body: JSON.stringify({ is_available: !current }) });
+    toast('Availability updated', 'success');
+    loadRooms(); loadStats();
+  } catch { toast('Failed to update', 'error'); }
+}
+
+function openAddRoom() {
+  document.getElementById('roomModalTitle').textContent = 'Add New Room';
+  document.getElementById('editRoomId').value = '';
+  ['mName','mPrice','mGuests','mImg','mDesc','mAmen'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mType').value = 'Studio';
+  openModal('addRoomModal');
+}
+
+function openEditRoom(r) {
+  document.getElementById('roomModalTitle').textContent = 'Edit Room';
+  document.getElementById('editRoomId').value = r.id;
+  document.getElementById('mName').value  = r.name || '';
+  document.getElementById('mType').value  = r.type || 'Studio';
+  document.getElementById('mPrice').value = r.price || '';
+  document.getElementById('mGuests').value= r.max_people || 2;
+  document.getElementById('mImg').value   = r.image_url || '';
+  document.getElementById('mDesc').value  = r.description || '';
+  document.getElementById('mAmen').value  = Array.isArray(r.amenities) ? r.amenities.join(', ') : '';
+  openModal('addRoomModal');
+}
+
+async function saveRoom() {
+  const id       = document.getElementById('editRoomId').value;
+  const name     = document.getElementById('mName').value.trim();
+  const price    = parseInt(document.getElementById('mPrice').value);
+  if (!name || !price) { toast('Name and price are required', 'error'); return; }
+  const payload  = {
+    name, type: document.getElementById('mType').value,
+    price, max_people: parseInt(document.getElementById('mGuests').value) || 2,
+    image_url:   document.getElementById('mImg').value.trim(),
+    description: document.getElementById('mDesc').value.trim(),
+    amenities:   document.getElementById('mAmen').value.split(',').map(a => a.trim()).filter(Boolean),
+  };
+  try {
+    if (id) await fetch(`${API_BASE}/api/rooms/${id}`,   { method:'PATCH', headers: authHeaders, body: JSON.stringify(payload) });
+    else    await fetch(`${API_BASE}/api/rooms`,          { method:'POST',  headers: authHeaders, body: JSON.stringify(payload) });
+    toast(`Room "${name}" ${id ? 'updated' : 'added'}`, 'success');
+    closeModal('addRoomModal'); loadRooms(); loadStats();
+  } catch { toast('Failed to save room', 'error'); }
+}
+
+/* ── BOOKINGS ───────────────────────────────────────────────── */
+let bookings = [];
+async function loadBookings(status = null) {
+  try {
+    const url = status ? `${API_BASE}/api/bookings?status=${status}` : `${API_BASE}/api/bookings`;
+    const r   = await fetch(url, { headers: authHeaders });
+    bookings  = await r.json();
+  } catch { bookings = []; }
+  renderBookings();
+}
+
+function renderBookings() {
+  const tbody = document.getElementById('allBookings');
+  if (!bookings.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">No bookings found</td></tr>'; return; }
+  tbody.innerHTML = bookings.map(b => `
+    <tr onclick="openBookingDetail(${safeJSON(b)})">
+      <td class="td-id">${b.id || '&mdash;'}</td>
+      <td>
+        <div style="font-weight:600">${b.guest_name || '&mdash;'}</div>
+        <div style="font-size:.72rem;color:var(--muted)">${b.guest_email || ''}</div>
+      </td>
+      <td>${b.room_name || '&mdash;'}</td>
+      <td style="font-size:.8rem">${fmtDate(b.checkin_date)} &rarr; ${fmtDate(b.checkout_date)}</td>
+      <td style="text-align:center">${b.nights || '&mdash;'}</td>
+      <td style="font-weight:700">${fmtKES(b.total_amount)}</td>
+      <td>${badge(b.status)}</td>
+      <td onclick="event.stopPropagation()">
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${b.status === 'pending'    ? `<button class="btn btn-sm btn-success" onclick="updateBooking('${b.id}','confirmed')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>` : ''}
+          ${b.status !== 'cancelled'  ? `<button class="btn btn-sm btn-danger"  onclick="updateBooking('${b.id}','cancelled')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openBookingDetail(b) {
+  document.getElementById('bookingModalBody').innerHTML = `
+    <div class="detail-row"><span class="key">Booking ID</span><span class="val" style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem">${b.id || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Guest Name</span><span class="val">${b.guest_name || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Email</span><span class="val">${b.guest_email || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Phone</span><span class="val">${b.guest_phone || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Room</span><span class="val">${b.room_name || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Check-in</span><span class="val">${fmtDate(b.checkin_date)}</span></div>
+    <div class="detail-row"><span class="key">Check-out</span><span class="val">${fmtDate(b.checkout_date)}</span></div>
+    <div class="detail-row"><span class="key">Nights</span><span class="val">${b.nights || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Guests</span><span class="val">${b.guest_count || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Total</span><span class="val" style="color:var(--gold)">${fmtKES(b.total_amount)}</span></div>
+    <div class="detail-row"><span class="key">Status</span><span class="val">${badge(b.status)}</span></div>
+    ${b.special_requests ? `<div class="detail-row"><span class="key">Special Requests</span><span class="val" style="max-width:58%;text-align:right">${b.special_requests}</span></div>` : ''}
+    <div class="detail-row"><span class="key">Booked On</span><span class="val">${fmtDT(b.created_at)}</span></div>
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+      ${b.status === 'pending'   ? `<button class="btn btn-success btn-sm" onclick="updateBooking('${b.id}','confirmed');closeModal('bookingModal')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirm</button>` : ''}
+      ${b.status !== 'cancelled' ? `<button class="btn btn-danger btn-sm"  onclick="updateBooking('${b.id}','cancelled');closeModal('bookingModal')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel</button>` : ''}
+      ${b.status === 'confirmed' ? `<button class="btn btn-ghost btn-sm"   onclick="updateBooking('${b.id}','completed');closeModal('bookingModal')">Mark Completed</button>` : ''}
+      <a href="mailto:${b.guest_email}?subject=Your Booking ${b.id}" class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Guest</a>
+      ${b.guest_phone ? `<a href="https://wa.me/${(b.guest_phone||'').replace(/\D/g,'')}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;border:none">WhatsApp</a>` : ''}
+    </div>
+  `;
+  openModal('bookingModal');
+}
+
+async function filterBookings(status, btn) {
+  document.querySelectorAll('#p-bookings .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  await loadBookings(status);
+}
+
+async function updateBooking(id, status) {
+  try {
+    await fetch(`${API_BASE}/api/bookings/${id}/status`, { method:'PATCH', headers: authHeaders, body: JSON.stringify({ status }) });
+    toast(`Booking ${status}`, 'success');
+    loadBookings(); loadStats();
+  } catch { toast('Failed to update booking', 'error'); }
+}
+
+/* ── PAYMENTS ───────────────────────────────────────────────── */
+let paymentData = [];
+async function loadPayments() {
+  try { const r = await fetch(`${API_BASE}/api/bookings`, { headers: authHeaders }); paymentData = await r.json(); }
+  catch { paymentData = []; }
+  renderPayments(null);
+}
+
+function renderPayments(filterStatus) {
+  let data = paymentData;
+  if (filterStatus === 'confirmed') data = data.filter(b => b.status === 'confirmed');
+  if (filterStatus === 'pending')   data = data.filter(b => b.status === 'pending');
+  document.getElementById('payTable').innerHTML = data.map(b => `
+    <tr onclick="openBookingDetail(${safeJSON(b)})">
+      <td class="td-id">${b.id || '&mdash;'}</td>
+      <td>${b.guest_name || '&mdash;'}</td>
+      <td>${b.room_name || '&mdash;'}</td>
+      <td style="font-weight:700">${fmtKES(b.total_amount)}</td>
+      <td>${fmtDate(b.checkin_date)}</td>
+      <td>${badge(b.status)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No payments yet</td></tr>';
+}
+
+function filterPayments(status, btn) {
+  document.querySelectorAll('#p-payments .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPayments(status);
+}
+
+/* ── REVIEWS ────────────────────────────────────────────────── */
+let reviews = [];
+async function loadReviews(status = null) {
+  try {
+    const url = status ? `${API_BASE}/api/reviews?status=${status}` : `${API_BASE}/api/reviews`;
+    const r   = await fetch(url, { headers: authHeaders });
+    reviews   = await r.json();
+  } catch { reviews = []; }
+  renderReviews();
+}
+
+function renderReviews() {
+  const el = document.getElementById('reviewsList');
+  if (!reviews.length) {
+    el.innerHTML = `<div class="empty-state"><div class="e-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><h4>No reviews yet</h4><p>Reviews submitted from room pages will appear here</p></div>`;
+    return;
+  }
+  el.innerHTML = reviews.map(r => `
+    <div class="rev-card" onclick="openReviewDetail(${safeJSON(r)})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b5832a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">${(r.guest_name||'G')[0].toUpperCase()}</div>
+          <div>
+            <div style="font-weight:700;font-size:.9rem">${r.guest_name || 'Guest'}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${r.room_name || 'Room'} &middot; ${fmtDate(r.created_at)}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="color:var(--gold)">${[...Array(r.rating||0)].map(()=>'<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--gold)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>').join('')+[...Array(5-(r.rating||0))].map(()=>'<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:#E8DCC8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>').join('')}</span>
+          ${badge(r.status)}
+        </div>
+      </div>
+      <p style="font-size:.875rem;color:var(--text);line-height:1.7">${r.review_text || ''}</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap" onclick="event.stopPropagation()">
+        ${r.status === 'pending'   ? `<button class="btn btn-sm btn-success" onclick="reviewAction(${r.id},'approved')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>` : ''}
+        ${r.status === 'approved'  ? `<button class="btn btn-sm btn-ghost"   onclick="reviewAction(${r.id},'pending')">Unpublish</button>` : ''}
+        ${r.status !== 'flagged'   ? `<button class="btn btn-sm btn-ghost"   onclick="reviewAction(${r.id},'flagged')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg> Flag</button>` : ''}
+        <button class="btn btn-sm btn-danger" onclick="deleteReview(${r.id})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openReviewDetail(r) {
+  document.getElementById('reviewModalBody').innerHTML = `
+    <div class="detail-row"><span class="key">Guest</span><span class="val">${r.guest_name || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Room</span><span class="val">${r.room_name || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Rating</span><span class="val">${[...Array(r.rating||0)].map(()=>"<svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='color:var(--gold)'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>").join('')} (${r.rating}/5)</span></div>
+    <div class="detail-row"><span class="key">Status</span><span class="val">${badge(r.status)}</span></div>
+    <div class="detail-row"><span class="key">Submitted</span><span class="val">${fmtDT(r.created_at)}</span></div>
+    <div style="margin-top:16px;background:var(--cream);border-radius:10px;padding:16px;font-size:.9rem;line-height:1.8;font-style:italic">"${r.review_text || ''}"</div>
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+      ${r.status === 'pending'  ? `<button class="btn btn-success btn-sm" onclick="reviewAction(${r.id},'approved');closeModal('reviewModal')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>` : ''}
+      ${r.status === 'approved' ? `<button class="btn btn-ghost btn-sm"   onclick="reviewAction(${r.id},'pending');closeModal('reviewModal')">Unpublish</button>` : ''}
+      ${r.status !== 'flagged'  ? `<button class="btn btn-ghost btn-sm"   onclick="reviewAction(${r.id},'flagged');closeModal('reviewModal')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg> Flag</button>` : ''}
+      <button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id});closeModal('reviewModal')">Delete</button>
+    </div>
+  `;
+  openModal('reviewModal');
+}
+
+async function filterReviews(status, btn) {
+  document.querySelectorAll('#p-reviews .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  await loadReviews(status);
+}
+
+async function reviewAction(id, status) {
+  try {
+    await fetch(`${API_BASE}/api/reviews/${id}/status`, { method:'PATCH', headers: authHeaders, body: JSON.stringify({ status }) });
+    toast(`Review ${status}`, 'success');
+    loadReviews(); loadStats();
+  } catch { toast('Failed', 'error'); }
+}
+
+async function deleteReview(id) {
+  if (!confirm('Delete this review permanently?')) return;
+  try {
+    await fetch(`${API_BASE}/api/reviews/${id}`, { method:'DELETE', headers: authHeaders });
+    toast('Review deleted', 'success');
+    loadReviews(); loadStats();
+  } catch { toast('Failed', 'error'); }
+}
+
+/* ── MESSAGES ───────────────────────────────────────────────── */
+async function loadMessages() {
+  const unread = document.getElementById('unreadOnly').checked;
+  try {
+    const url  = `${API_BASE}/api/contact/messages${unread ? '?unread_only=true' : ''}`;
+    const r    = await fetch(url, { headers: authHeaders });
+    const msgs = await r.json();
+    const el   = document.getElementById('messagesList');
+    if (!msgs.length) {
+      el.innerHTML = `<div class="empty-state"><div class="e-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><h4>No messages</h4><p>Contact form submissions will appear here</p></div>`;
+      return;
+    }
+    el.innerHTML = msgs.map(m => `
+      <div class="msg-card ${m.is_read ? '' : 'unread'}" id="mc-${m.id}" onclick="openMessageDetail(${safeJSON(m)})">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div>
+            <div style="font-weight:700;font-size:.9rem">${m.name || '&mdash;'} <span style="font-weight:400;color:var(--muted);font-size:.8rem">&lt;${m.email || ''}&gt;</span></div>
+            <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-top:2px">${m.subject || '&mdash;'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            ${!m.is_read ? '<span class="badge b-gold">New</span>' : ''}
+            <span style="font-size:.72rem;color:var(--muted)">${fmtDate(m.created_at)}</span>
+          </div>
+        </div>
+        <div style="font-size:.875rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.message || ''}</div>
+        ${m.phone ? `<div style="font-size:.72rem;color:var(--muted);margin-top:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 2.98 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 5.93 5.93l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16.92z"/></svg> ${m.phone}</div>` : ''}
+      </div>
+    `).join('');
+  } catch { document.getElementById('messagesList').innerHTML = '<div class="empty-state"><h4>Could not load messages</h4></div>'; }
+}
+
+function openMessageDetail(m) {
+  document.getElementById('messageModalBody').innerHTML = `
+    <div class="detail-row"><span class="key">From</span><span class="val">${m.name || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Email</span><span class="val">${m.email || '&mdash;'}</span></div>
+    ${m.phone ? `<div class="detail-row"><span class="key">Phone</span><span class="val">${m.phone}</span></div>` : ''}
+    <div class="detail-row"><span class="key">Subject</span><span class="val">${m.subject || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Received</span><span class="val">${fmtDT(m.created_at)}</span></div>
+    <div class="detail-row"><span class="key">Status</span><span class="val">${m.is_read ? '<span class="badge b-green">Read</span>' : '<span class="badge b-gold">Unread</span>'}</span></div>
+    <div style="margin-top:16px;background:var(--cream);border-radius:10px;padding:18px;font-size:.9rem;line-height:1.8;white-space:pre-wrap">${m.message || ''}</div>
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+      <a href="mailto:${m.email}?subject=Re: ${encodeURIComponent(m.subject||'')}" class="btn btn-primary btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Reply via Email</a>
+      ${m.phone ? `<a href="https://wa.me/${(m.phone||'').replace(/\D/g,'')}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;border:none">WhatsApp</a>` : ''}
+      ${!m.is_read ? `<button class="btn btn-ghost btn-sm" onclick="markRead(${m.id},false);closeModal('messageModal')">Mark as Read</button>` : ''}
+    </div>
+  `;
+  if (!m.is_read) markRead(m.id, true); // auto mark read silently
+  openModal('messageModal');
+}
+
+async function markRead(id, silent = false) {
+  try {
+    await fetch(`${API_BASE}/api/contact/messages/${id}/read`, { method:'PATCH', headers: authHeaders });
+    const card = document.getElementById('mc-' + id);
+    if (card) { card.classList.remove('unread'); card.querySelector('.badge')?.remove(); }
+    if (!silent) toast('Marked as read', 'success');
+    loadStats();
+  } catch { if (!silent) toast('Failed', 'error'); }
+}
+
+async function markAllRead() {
+  try {
+    const r  = await fetch(`${API_BASE}/api/contact/messages`, { headers: authHeaders });
+    const ms = await r.json();
+    await Promise.all(ms.filter(m => !m.is_read).map(m =>
+      fetch(`${API_BASE}/api/contact/messages/${m.id}/read`, { method:'PATCH', headers: authHeaders })
+    ));
+    toast('All messages marked as read', 'success');
+    loadMessages(); loadStats();
+  } catch { toast('Failed', 'error'); }
+}
+
+/* ── GUESTS ─────────────────────────────────────────────────── */
+let allGuests = [];
+async function loadGuests() {
+  try { const r = await fetch(`${API_BASE}/api/admin/users`, { headers: authHeaders }); allGuests = await r.json(); }
+  catch { allGuests = []; }
+  renderGuests(allGuests);
+}
+
+function renderGuests(data) {
+  const tbody = document.getElementById('guestTable');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No guests registered yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(g => `
+    <tr>
+      <td style="font-weight:600">${g.first_name || ''} ${g.last_name || ''}</td>
+      <td style="color:var(--muted);font-size:.82rem">${g.email || '&mdash;'}</td>
+      <td style="font-size:.82rem">${g.phone || '&mdash;'}</td>
+      <td>${badge(g.role)}</td>
+      <td style="font-size:.78rem;color:var(--muted)">${fmtDate(g.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <a href="mailto:${g.email}" class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</a>
+          ${g.role === 'guest' ? `<button class="btn btn-sm btn-ghost" onclick="promoteGuest(${g.id},'${g.email}')">&#8594; Admin</button>` : ''}
+          ${g.role === 'admin' && g.id !== user.id ? `<button class="btn btn-sm btn-danger" onclick="demoteGuest(${g.id})">Revoke Admin</button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function searchGuests(q) {
+  if (!q) return renderGuests(allGuests);
+  const lq = q.toLowerCase();
+  renderGuests(allGuests.filter(g =>
+    (g.first_name||'').toLowerCase().includes(lq) ||
+    (g.last_name||'').toLowerCase().includes(lq)  ||
+    (g.email||'').toLowerCase().includes(lq)       ||
+    (g.phone||'').includes(lq)
+  ));
+}
+
+async function promoteGuest(uid, email) {
+  if (!confirm(`Make ${email} an admin?`)) return;
+  try {
+    await fetch(`${API_BASE}/api/admin/users/${uid}`, { method:'PATCH', headers: authHeaders, body: JSON.stringify({ role:'admin' }) });
+    toast('User promoted to admin', 'success'); loadGuests();
+  } catch { toast('Failed', 'error'); }
+}
+
+async function demoteGuest(uid) {
+  if (!confirm('Revoke admin access from this user?')) return;
+  try {
+    await fetch(`${API_BASE}/api/admin/users/${uid}`, { method:'PATCH', headers: authHeaders, body: JSON.stringify({ role:'guest' }) });
+    toast('Admin access revoked', 'success'); loadGuests();
+  } catch { toast('Failed', 'error'); }
+}
+
+/* ── AUTO REFRESH ───────────────────────────────────────────── */
+let refreshTimer = null;
+function toggleAutoRefresh(on) {
+  clearInterval(refreshTimer);
+  if (on) refreshTimer = setInterval(() => { loadStats(); }, 30000);
+}
+
+/* ── INIT ───────────────────────────────────────────────────── */
+loadStats();
+toggleAutoRefresh(true);
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Room &mdash; Serenity Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.booking-wrap { max-width:1000px; margin:0 auto; padding:calc(var(--nav-h)+48px) 5% 80px; }
+.booking-grid { display:grid; grid-template-columns:1fr 1.1fr; gap:36px; align-items:start; }
+
+/* PROGRESS STEPS */
+.steps { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:48px; }
+.step { display:flex; align-items:center; gap:10px; }
+.step-num { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:700; background:var(--border); color:var(--muted); }
+.step.active .step-num { background:var(--gold); color:#fff; }
+.step.done .step-num { background:var(--success); color:#fff; display:flex; align-items:center; justify-content:center; }
+.step-label { font-size:.8rem; font-weight:600; color:var(--muted); }
+.step.active .step-label { color:var(--dark); }
+.step-line { width:60px; height:2px; background:var(--border); margin:0 8px; }
+.step-line.done { background:var(--success); }
+
+/* LEFT - SUMMARY */
+.summary-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.sum-img { height:200px; overflow:hidden; }
+.sum-img img { width:100%; height:100%; object-fit:cover; }
+.sum-body { padding:24px; }
+.sum-type { font-size:.72rem; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.sum-name { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--dark); margin-bottom:16px; }
+.sum-dates { background:var(--cream); border-radius:var(--radius-sm); padding:14px; display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; border:1px solid var(--border); }
+.sum-date-item .lbl { font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); font-weight:700; margin-bottom:4px; }
+.sum-date-item .val { font-size:.95rem; font-weight:600; color:var(--dark); }
+.price-rows { border-top:1px solid var(--border); padding-top:16px; }
+.price-row { display:flex; justify-content:space-between; font-size:.875rem; padding:5px 0; color:var(--muted); }
+.price-row.total { color:var(--dark); font-weight:700; font-size:1rem; border-top:1px solid var(--border); padding-top:12px; margin-top:6px; }
+
+/* RIGHT - FORM */
+.booking-form-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:32px; }
+.booking-form-card h2 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin-bottom:24px; }
+.form-grid { display:grid; gap:16px; }
+.form-grid .span-2 { grid-column:1/-1; }
+.form-note { font-size:.8rem; color:var(--muted); margin-top:4px; }
+
+@media(max-width:760px){
+  .booking-grid { grid-template-columns:1fr; }
+  .step-label { display:none; }
+  .step-line { width:32px; }
+}
+</style>
+</head>
+<body>
+<div id="nav-slot"></div>
+<div class="booking-wrap">
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step done"><div class="step-num">&#10003;</div><div class="step-label">Room</div></div>
+    <div class="step-line done"></div>
+    <div class="step active"><div class="step-num">2</div><div class="step-label">Your Details</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">3</div><div class="step-label">Payment</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">4</div><div class="step-label">Confirmed</div></div>
+  </div>
+
+  <div class="booking-grid">
+    <!-- SUMMARY -->
+    <div>
+      <div class="s-tag" style="margin-bottom:12px">Booking Summary</div>
+      <div class="summary-card" id="summaryCard"></div>
+    </div>
+
+    <!-- FORM -->
+    <div class="booking-form-card">
+      <h2>Your Details</h2>
+      <div class="form-grid">
+        <div class="form-group span-2">
+          <label>Full Name</label>
+          <input type="text" class="form-control" id="fullName" placeholder="e.g. Jane Wanjiku">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" class="form-control" id="phone" placeholder="07XX XXX XXX">
+          <p class="form-note">Used for M-Pesa payment confirmation</p>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" class="form-control" id="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group span-2">
+          <label>Number of Guests</label>
+          <select class="form-control" id="guestCount" style="max-width:180px"></select>
+        </div>
+        <div class="form-group span-2">
+          <label>Special Requests (optional)</label>
+          <textarea class="form-control" id="requests" style="min-height:80px" placeholder="Early check-in, extra pillows, ground floor room…"></textarea>
+        </div>
+        <div class="span-2" style="margin-top:8px">
+          <button class="btn btn-primary btn-full btn-lg" onclick="proceedPayment()">Proceed to Payment &rarr;</button>
+          <p id="formErr" style="font-size:.8rem;color:var(--error);margin-top:10px;text-align:center;min-height:16px"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-slot"></div>
+<script src="shared.js"></script>
+<script>
+document.getElementById('nav-slot').innerHTML = navHTML('');
+document.getElementById('footer-slot').innerHTML = footerHTML();
+sharedInit();
+
+const p = new URLSearchParams(location.search);
+const room = getRoom(p.get('id')) || ROOMS[0];
+const nights = parseInt(p.get('nights'))||1;
+const checkin = p.get('checkin')||'';
+const checkout = p.get('checkout')||'';
+const sub = room.price * nights;
+const fee = Math.round(sub * 0.05);
+const total = sub + fee;
+
+const gSel = document.getElementById('guestCount');
+for(let i=1;i<=room.people;i++){
+  const o=document.createElement('option');
+  o.value=i; o.textContent=i+' Guest'+(i>1?'s':'');
+  gSel.appendChild(o);
+}
+const pg = p.get('guests');
+if(pg) gSel.value = parseInt(pg);
+
+function fmt(d){ if(!d) return '&mdash;'; return new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}); }
+
+document.getElementById('summaryCard').innerHTML = `
+  <div class="sum-img"><img src="${room.image}" alt="${room.name}"></div>
+  <div class="sum-body">
+    <div class="sum-type">${room.type}</div>
+    <div class="sum-name">${room.name}</div>
+    <div class="sum-dates">
+      <div class="sum-date-item"><div class="lbl">Check-in</div><div class="val">${fmt(checkin)}</div></div>
+      <div class="sum-date-item"><div class="lbl">Check-out</div><div class="val">${fmt(checkout)}</div></div>
+    </div>
+    <div class="price-rows">
+      <div class="price-row"><span>${formatKES(room.price)} &times; ${nights} night${nights>1?'s':''}</span><span>${formatKES(sub)}</span></div>
+      <div class="price-row"><span>Service fee (5%)</span><span>${formatKES(fee)}</span></div>
+      <div class="price-row total"><span>Total</span><span>${formatKES(total)}</span></div>
+    </div>
+  </div>
+`;
+
+async function proceedPayment(){
+  const name=document.getElementById('fullName').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const err=document.getElementById('formErr');
+
+  if(!name){ err.textContent='Please enter your full name.'; return; }
+  if(!phone){ err.textContent='Please enter your phone number.'; return; }
+  if(!email||!email.includes('@')){ err.textContent='Please enter a valid email.'; return; }
+  err.textContent='';
+
+  // Create booking in backend
+  try{
+    const result = await createBooking({
+      room_id: room.id,
+      checkin, checkout, nights, total,
+      name, phone, email,
+      guests: parseInt(document.getElementById('guestCount').value),
+      requests: document.getElementById('requests').value.trim()
+    });
+
+    const qs = new URLSearchParams({
+      id:room.id, checkin, checkout, nights, total,
+      name, phone, email,
+      guests: document.getElementById('guestCount').value,
+      bookingId: result.booking_id
+    });
+    window.location = 'payment.html?' + qs.toString();
+  } catch(e){
+    // Fallback: proceed without backend
+    const qs = new URLSearchParams({
+      id:room.id, checkin, checkout, nights, total,
+      name, phone, email,
+      guests: document.getElementById('guestCount').value
+    });
+    window.location = 'payment.html?' + qs.toString();
+  }
+}
+</script>
+</body>
+</html>

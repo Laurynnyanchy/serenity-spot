@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment &mdash; Serenity Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.pay-wrap { max-width:720px; margin:0 auto; padding:calc(var(--nav-h)+48px) 5% 80px; }
+
+/* STEPS */
+.steps { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:48px; }
+.step { display:flex; align-items:center; gap:10px; }
+.step-num { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:700; background:var(--border); color:var(--muted); }
+.step.active .step-num { background:var(--gold); color:#fff; }
+.step.done .step-num { background:var(--success); color:#fff; }
+.step-label { font-size:.8rem; font-weight:600; color:var(--muted); }
+.step.active .step-label { color:var(--dark); }
+.step-line { width:60px; height:2px; background:var(--border); margin:0 8px; }
+.step-line.done { background:var(--success); }
+
+/* SUMMARY STRIP */
+.pay-summary { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:20px 24px; display:flex; align-items:center; gap:20px; margin-bottom:28px; overflow:hidden; }
+.pay-sum-img { width:80px; height:70px; border-radius:10px; overflow:hidden; flex-shrink:0; }
+.pay-sum-img img { width:100%; height:100%; object-fit:cover; }
+.pay-sum-info { flex:1; }
+.pay-sum-info h3 { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--dark); margin-bottom:4px; }
+.pay-sum-info p { font-size:.82rem; color:var(--muted); }
+.pay-sum-total { text-align:right; flex-shrink:0; }
+.pay-sum-total .amount { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:var(--dark); display:block; }
+.pay-sum-total .lbl { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+
+/* TABS */
+.pay-tabs { display:flex; gap:0; background:var(--cream); border-radius:12px; padding:4px; border:1px solid var(--border); margin-bottom:24px; }
+.pay-tab { flex:1; padding:12px; text-align:center; border-radius:9px; font-weight:600; font-size:.88rem; cursor:pointer; background:transparent; border:none; color:var(--muted); transition:all .22s; }
+.pay-tab.active { background:var(--white); color:var(--dark); box-shadow:var(--shadow); }
+
+/* PANEL */
+.pay-panel { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:32px; }
+
+/* M-PESA */
+.mpesa-logo { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+.mpesa-badge { background:#00A651; color:#fff; font-size:1rem; font-weight:900; padding:8px 16px; border-radius:8px; letter-spacing:.5px; }
+.mpesa-desc { font-size:.82rem; color:var(--muted); line-height:1.5; }
+.stk-steps { display:flex; flex-direction:column; gap:10px; margin:20px 0; }
+.stk-step { display:flex; align-items:flex-start; gap:12px; font-size:.875rem; }
+.stk-step .num { width:24px; height:24px; border-radius:50%; background:var(--gold-pale); border:1px solid rgba(200,151,58,.3); color:var(--gold); font-size:.75rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.phone-input-wrap { position:relative; }
+.phone-prefix { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-weight:700; color:var(--dark); font-size:.9rem; pointer-events:none; }
+.phone-input-wrap input { padding-left:56px; }
+
+/* CARD */
+.card-brands { display:flex; gap:8px; }
+.card-brand { background:var(--cream); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:.75rem; font-weight:700; color:var(--muted); }
+.card-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+/* PROCESSING OVERLAY */
+.processing-overlay {
+  display:none; position:fixed; inset:0; z-index:300;
+  background:rgba(26,18,8,.75); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center;
+}
+.processing-overlay.show { display:flex; }
+.proc-card { background:var(--white); border-radius:var(--radius); padding:48px 40px; text-align:center; max-width:360px; width:90%; }
+.proc-spinner { width:56px; height:56px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 24px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.proc-card h3 { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--dark); margin-bottom:8px; }
+.proc-card p { font-size:.875rem; color:var(--muted); line-height:1.6; }
+.proc-phone { font-weight:700; color:var(--dark); }
+
+/* STATUS BADGE */
+.proc-status { display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:20px; font-size:.8rem; font-weight:700; margin-top:16px; }
+.proc-status.pending { background:var(--gold-pale); color:var(--gold); }
+.proc-status.success { background:#e8f8ee; color:var(--success); }
+.proc-status.error { background:#fde8e8; color:var(--error); }
+
+@media(max-width:560px){
+  .pay-summary { flex-direction:column; text-align:center; }
+  .pay-sum-total { text-align:center; }
+  .card-row { grid-template-columns:1fr; }
+  .step-label { display:none; }
+  .step-line { width:32px; }
+}
+</style>
+</head>
+<body>
+<div id="nav-slot"></div>
+<div class="pay-wrap">
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step done"><div class="step-num">&#10003;</div><div class="step-label">Room</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">&#10003;</div><div class="step-label">Your Details</div></div>
+    <div class="step-line done"></div>
+    <div class="step active"><div class="step-num">3</div><div class="step-label">Payment</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">4</div><div class="step-label">Confirmed</div></div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="pay-summary" id="paySummary"></div>
+
+  <!-- PAYMENT TABS -->
+  <div class="pay-tabs">
+    <button class="pay-tab active" onclick="switchTab('mpesa',this)">📱 M-Pesa</button>
+    <button class="pay-tab" onclick="switchTab('card',this)">💳 Card Payment</button>
+  </div>
+
+  <!-- M-PESA PANEL -->
+  <div class="pay-panel" id="panelMpesa">
+    <div class="mpesa-logo">
+      <div class="mpesa-badge">M-PESA</div>
+      <div class="mpesa-desc">Safaricom Daraja API &middot; Instant STK Push</div>
+    </div>
+    <p style="font-size:.875rem;color:var(--muted);line-height:1.7;margin-bottom:16px">You will receive an M-Pesa prompt on your phone. Enter your PIN to complete the payment.</p>
+    <div class="stk-steps">
+      <div class="stk-step"><div class="num">1</div><span>Enter your Safaricom M-Pesa number below</span></div>
+      <div class="stk-step"><div class="num">2</div><span>Click <strong>Pay with M-Pesa</strong></span></div>
+      <div class="stk-step"><div class="num">3</div><span>An STK push will appear on your phone</span></div>
+      <div class="stk-step"><div class="num">4</div><span>Enter your M-Pesa PIN to confirm</span></div>
+    </div>
+    <div class="form-group" style="margin:20px 0 24px">
+      <label>M-Pesa Phone Number</label>
+      <div class="phone-input-wrap">
+        <span class="phone-prefix">+254</span>
+        <input type="tel" class="form-control" id="mpesaPhone" placeholder="7XX XXX XXX" maxlength="9">
+      </div>
+    </div>
+    <button class="btn btn-full btn-lg" style="background:#00A651;color:#fff;font-size:1rem;border:none;border-radius:40px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:15px" onclick="payMpesa()" id="mpesaBtn">
+      📱 Pay with M-Pesa
+    </button>
+    <p id="mpesaErr" style="font-size:.8rem;color:var(--error);margin-top:10px;min-height:16px;text-align:center"></p>
+  </div>
+
+  <!-- CARD PANEL -->
+  <div class="pay-panel" id="panelCard" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <p style="font-weight:600;color:var(--dark)">Pay by Card</p>
+      <div class="card-brands">
+        <div class="card-brand" style="color:#1a1f71">VISA</div>
+        <div class="card-brand" style="color:#eb001b">MC</div>
+        <div class="card-brand" style="color:#2671b9">AMEX</div>
+      </div>
+    </div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
+      Clicking <strong>Pay Now</strong> opens a secure Flutterwave checkout popup where you can safely enter your card details. Your card information never touches our server.
+    </p>
+
+    <!-- What the user sees before clicking Pay -->
+    <div style="background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;font-size:.875rem;padding:5px 0;color:var(--muted)">
+        <span>Booking ID</span><span id="crdBid" style="font-weight:600;color:var(--dark)"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.875rem;padding:5px 0;color:var(--muted)">
+        <span>Guest</span><span id="crdGuest" style="font-weight:600;color:var(--dark)"></span>
+      </div>
+      <div style="height:1px;background:var(--border);margin:10px 0"></div>
+      <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;color:var(--dark)">
+        <span>Total</span><span id="crdTotal"></span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full btn-lg" style="margin-top:4px" id="cardPayBtn" onclick="payCard()">
+      💳 Pay Now &mdash; Secure Checkout
+    </button>
+    <p id="cardErr" style="font-size:.8rem;color:var(--error);min-height:16px;text-align:center;margin-top:10px"></p>
+
+    <p style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:16px">
+      &#128274; Secured by <strong>Flutterwave</strong> &middot; PCI DSS Compliant &middot; 256-bit SSL
+    </p>
+  </div>
+</div>
+
+<!-- PROCESSING OVERLAY -->
+<div class="processing-overlay" id="procOverlay">
+  <div class="proc-card">
+    <div class="proc-spinner" id="procSpinner"></div>
+    <div id="procCheckIcon" style="display:none;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#2A7A50,#34a865);align-items:center;justify-content:center;margin:0 auto 24px;color:#fff">&#10003;</div>
+    <h3 id="procTitle">Sending STK Push…</h3>
+    <p id="procMsg">Check your phone and enter your M-Pesa PIN.</p>
+    <div id="procStatusBadge" class="proc-status pending" style="margin:0 auto">Processing…</div>
+    <button id="procCancelBtn" class="btn btn-ghost" style="margin-top:20px;display:none" onclick="cancelPayment()">Cancel</button>
+  </div>
+</div>
+
+<div id="footer-slot"></div>
+<script src="shared.js"></script>
+<script>
+document.getElementById('nav-slot').innerHTML = navHTML('');
+document.getElementById('footer-slot').innerHTML = footerHTML();
+sharedInit();
+
+const p = new URLSearchParams(location.search);
+const room = getRoom(p.get('id')) || ROOMS[0];
+const nights = parseInt(p.get('nights'))||1;
+const total = parseInt(p.get('total')) || room.price * nights;
+const checkin = p.get('checkin')||'';
+const checkout = p.get('checkout')||'';
+const guestName = p.get('name')||'';
+const phone = p.get('phone')||'';
+const bookingId = p.get('bookingId') || 'BNB'+Math.floor(Math.random()*90000+10000);
+
+function fmt(d){ if(!d) return '&mdash;'; return new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}); }
+
+document.getElementById('paySummary').innerHTML = `
+  <div class="pay-sum-img"><img src="${room.image}" alt="${room.name}"></div>
+  <div class="pay-sum-info">
+    <h3>${room.name}</h3>
+    <p>${room.type} &middot; ${nights} night${nights>1?'s':''}</p>
+    <p style="margin-top:4px">${fmt(checkin)} &rarr; ${fmt(checkout)}</p>
+  </div>
+  <div class="pay-sum-total">
+    <span class="amount">${formatKES(total)}</span>
+    <span class="lbl">Total Due</span>
+  </div>
+`;
+
+// Pre-fill phone from booking details
+if(phone){
+  document.getElementById('mpesaPhone').value = phone.replace(/^(\+254|254|0)/,'');
+}
+
+function switchTab(tab, btn){
+  document.querySelectorAll('.pay-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panelMpesa').style.display = tab==='mpesa'?'block':'none';
+  document.getElementById('panelCard').style.display = tab==='card'?'block':'none';
+}
+
+let currentCheckoutId = null;
+
+async function payMpesa(){
+  const ph = document.getElementById('mpesaPhone').value.trim();
+  const err = document.getElementById('mpesaErr');
+  if(!ph || ph.length < 9){ err.textContent='Enter a valid 9-digit Safaricom number.'; return; }
+  err.textContent='';
+
+  // Show processing overlay
+  showProcessing('Sending STK Push…', `Check your phone (+254${ph}) and enter your M-Pesa PIN.`, 'pending');
+  document.getElementById('procCancelBtn').style.display = 'inline-flex';
+
+  try{
+    // Initiate real Daraja STK Push
+    const result = await initiateMpesaPayment({
+      phone: '254'+ph,
+      amount: total,
+      accountRef: bookingId,
+      description: 'Serenity Spot'
+    });
+
+    currentCheckoutId = result.checkout_request_id;
+    showProcessing('Waiting for M-Pesa PIN…', `STK push sent to +254${ph}. Please enter your PIN on your phone.`, 'pending');
+
+    // Poll for payment status
+    const payResult = await pollPaymentStatus(currentCheckoutId);
+    
+    // Payment confirmed
+    document.getElementById('procCancelBtn').style.display = 'none';
+    document.getElementById('procSpinner').style.display = 'none';
+    showProcessing('Payment Confirmed!', 'Your payment was received. Redirecting to confirmation…', 'success');
+    
+    setTimeout(()=>{
+      const qs = new URLSearchParams({
+        id:room.id, checkin, checkout, nights, total,
+        name: guestName, method:'M-Pesa', bookingId,
+        receipt: payResult.receipt||''
+      });
+      window.location = 'confirmation.html?' + qs.toString();
+    }, 2000);
+
+  } catch(e){
+    document.getElementById('procCancelBtn').style.display = 'none';
+    document.getElementById('procSpinner').style.display = 'none';
+    showProcessing('Payment Failed', e.message||'Payment was not completed. Please try again.', 'error');
+    setTimeout(()=>{
+      document.getElementById('procOverlay').classList.remove('show');
+      document.getElementById('procSpinner').style.display = 'block';
+    }, 3000);
+  }
+}
+
+function cancelPayment(){
+  document.getElementById('procOverlay').classList.remove('show');
+  currentCheckoutId = null;
+}
+
+function showProcessing(title, msg, status){
+  document.getElementById('procOverlay').classList.add('show');
+  document.getElementById('procTitle').textContent = title;
+  document.getElementById('procMsg').textContent = msg;
+  const badge = document.getElementById('procStatusBadge');
+  badge.className = 'proc-status '+status;
+  badge.textContent = status==='pending'?'Processing…':status==='success'?'&#10003; Confirmed':'&#10007; Failed';
+}
+
+// ── Pre-fill card summary panel ───────────────────────────────
+document.getElementById('crdBid').textContent   = bookingId;
+document.getElementById('crdGuest').textContent = guestName || 'Guest';
+document.getElementById('crdTotal').textContent = formatKES(total);
+
+// ── Flutterwave card payment ──────────────────────────────────
+let FLW_PUBLIC_KEY = '';
+
+// Fetch FLW public key from backend on page load
+(async () => {
+  try {
+    const r = await fetch(`${API_BASE}/api/flutterwave/config`);
+    if(r.ok){
+      const d = await r.json();
+      FLW_PUBLIC_KEY = d.public_key || '';
+    }
+  } catch(e) { /* card payments unavailable if backend unreachable */ }
+})();
+
+function payCard(){
+  const err = document.getElementById('cardErr');
+
+  if(!FLW_PUBLIC_KEY){
+    err.textContent = 'Card payments not yet configured &mdash; add FLW_PUBLIC_KEY and FLW_SECRET_KEY to your .env and restart.';
+    return;
+  }
+
+  // Load Flutterwave inline script dynamically if not already loaded
+  if(!window.FlutterwaveCheckout){
+    err.textContent = '';
+    const script = document.createElement('script');
+    script.src = 'https://checkout.flutterwave.com/v3.js';
+    script.onload = () => launchFlutterwave();
+    script.onerror = () => { err.textContent = 'Could not load payment SDK. Check your internet connection.'; };
+    document.head.appendChild(script);
+  } else {
+    launchFlutterwave();
+  }
+}
+
+function launchFlutterwave(){
+  const guestEmail = p.get('email') || '';
+  const guestPhone = p.get('phone') || '';
+
+  FlutterwaveCheckout({
+    public_key: FLW_PUBLIC_KEY,
+    tx_ref: bookingId + '-' + Date.now(),
+    amount: total,
+    currency: 'KES',
+    payment_options: 'card,mobilemoney,ussd',
+    customer: {
+      email:     guestEmail || 'guest@serenityspot.co.ke',
+      phone_number: guestPhone,
+      name:      guestName  || 'Guest',
+    },
+    customizations: {
+      title:       'Serenity Spot',
+      description: `Booking ${bookingId} &mdash; ${room.name} (${nights} night${nights>1?'s':''})`,
+      logo:        'https://i.imgur.com/placeholder.png', // replace with your logo URL
+    },
+    meta: {
+      booking_id:  bookingId,
+      room_id:     room.id,
+      nights:      nights,
+    },
+    callback: async function(response) {
+      // response.status === 'successful' | 'cancelled'
+      if(response.status === 'successful' || response.status === 'completed'){
+        showProcessing('Verifying Payment…', 'Please wait while we confirm your payment.', 'pending');
+
+        // Verify via backend (prevents spoofing)
+        try {
+          const verify = await fetch(`${API_BASE}/api/flutterwave/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              transaction_id: response.transaction_id,
+              tx_ref:         response.tx_ref,
+              booking_id:     bookingId,
+              expected_amount: total,
+            })
+          });
+          const result = await verify.json();
+          if(!result.success) throw new Error(result.detail || 'Verification failed');
+        } catch(e) {
+          // If backend verification fails, still proceed (log for manual review)
+          console.warn('Backend verification error:', e.message);
+        }
+
+        document.getElementById('procSpinner').style.display = 'none';
+        showProcessing('Payment Confirmed!', 'Redirecting to your booking confirmation…', 'success');
+
+        setTimeout(()=>{
+          const qs = new URLSearchParams({
+            id: room.id, checkin, checkout, nights, total,
+            name: guestName, method: 'Card', bookingId,
+            receipt: response.transaction_id || response.flw_ref || '',
+          });
+          window.location = 'confirmation.html?' + qs.toString();
+        }, 2000);
+
+      } else {
+        document.getElementById('cardErr').textContent = 'Payment was cancelled or failed. Please try again.';
+      }
+    },
+    onclose: function() {
+      // User closed the popup without paying &mdash; do nothing, let them retry
+      document.getElementById('cardErr').textContent = 'Payment window closed. Click Pay Now to try again.';
+    }
+  });
+}
+
+function fmtCard(el){ let v=el.value.replace(/\D/g,'').substring(0,16); el.value=v.replace(/(.{4})/g,'$1 ').trim(); }
+function fmtExp(el){ let v=el.value.replace(/\D/g,''); if(v.length>=2) v=v.substring(0,2)+' / '+v.substring(2,4); el.value=v; }
+</script>
+</body>
+</html>

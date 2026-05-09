@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Confirmed &mdash; Serenity Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.confirm-wrap {
+  max-width:640px; margin:0 auto;
+  padding:calc(var(--nav-h)+60px) 5% 80px;
+  text-align:center;
+}
+
+/* ANIMATED CHECK */
+.success-ring {
+  width:90px; height:90px; border-radius:50%;
+  background:linear-gradient(135deg,#2A7A50,#34a865);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 24px;
+  box-shadow:0 10px 40px rgba(42,122,80,.35);
+  animation:popIn .5s .1s cubic-bezier(.34,1.56,.64,1) both;
+  color:#fff;
+}
+.success-ring svg { width:40px; height:40px; stroke-width:3; }
+
+.confetti-row { font-size:2rem; margin-bottom:20px; animation:fadeUp .5s both; }
+.confirm-wrap h1 {
+  font-family:'Playfair Display',serif; font-size:2.2rem;
+  color:var(--dark); margin-bottom:10px;
+  animation:fadeUp .6s .2s both;
+}
+.confirm-wrap .sub {
+  color:var(--muted); font-size:.95rem; line-height:1.75;
+  margin-bottom:36px; animation:fadeUp .6s .3s both;
+}
+
+@keyframes popIn { from{transform:scale(0);opacity:0} 60%{transform:scale(1.12)} to{transform:scale(1);opacity:1} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* BOOKING CARD */
+.bk-card {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+  margin-bottom:24px; text-align:left;
+  animation:fadeUp .6s .4s both;
+}
+.bk-header {
+  background:linear-gradient(135deg,var(--dark),#5c3d18);
+  display:grid; grid-template-columns:80px 1fr; gap:0;
+}
+.bk-header-img { height:100%; overflow:hidden; }
+.bk-header-img img { width:100%; height:100%; object-fit:cover; opacity:.7; }
+.bk-header-text { padding:22px 24px; }
+.bk-header-text h3 { font-family:'Playfair Display',serif; color:#fff; font-size:1.15rem; margin-bottom:4px; }
+.bk-header-text p  { color:rgba(255,255,255,.6); font-size:.82rem; }
+
+.bk-body { padding:0 24px; }
+.bk-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 0; border-bottom:1px solid var(--border);
+  font-size:.875rem;
+}
+.bk-row:last-child { border-bottom:none; }
+.bk-row .key { color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+.bk-row .val { font-weight:600; color:var(--dark); text-align:right; }
+.bid  { font-family:'Playfair Display',serif; font-size:1.25rem; color:var(--gold); }
+.paid-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:#e8f8ee; color:var(--success);
+  font-size:.75rem; font-weight:700; padding:5px 14px;
+  border-radius:20px; border:1px solid rgba(42,122,80,.2);
+}
+
+/* NEXT STEPS */
+.next-steps {
+  background:var(--cream); border:1px solid var(--border);
+  border-radius:var(--radius); padding:24px 28px;
+  margin-bottom:24px; text-align:left;
+  animation:fadeUp .6s .5s both;
+}
+.next-steps h4 { font-family:'Playfair Display',serif; font-size:1rem; color:var(--dark); margin-bottom:14px; }
+.step-item { display:flex; gap:12px; font-size:.875rem; color:var(--text); margin-bottom:10px; line-height:1.6; }
+.step-dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; margin-top:7px; }
+
+/* ACTIONS */
+.actions {
+  display:flex; gap:12px; justify-content:center;
+  flex-wrap:wrap; animation:fadeUp .6s .6s both;
+}
+.wa-btn {
+  display:inline-flex; align-items:center; gap:10px;
+  background:#25D366; color:#fff; border-radius:40px;
+  padding:12px 24px; font-weight:700; font-size:.9rem;
+  transition:all .22s;
+}
+.wa-btn:hover { background:#1fbb58; transform:translateY(-2px); box-shadow:0 6px 20px rgba(37,211,102,.35); }
+</style>
+</head>
+<body>
+<div id="nav-slot"></div>
+
+<div class="confirm-wrap">
+  <div class="confetti-row">&#127881;</div>
+  <div class="success-ring">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <h1>Booking Confirmed!</h1>
+  <p class="sub">Your room has been successfully reserved.<br>A confirmation has been sent to your email.</p>
+
+  <div class="bk-card" id="bookingCard"></div>
+
+  <div class="next-steps">
+    <h4>What happens next?</h4>
+    <div class="step-item"><div class="step-dot"></div><span>You'll receive a confirmation email with all your booking details and receipt.</span></div>
+    <div class="step-item"><div class="step-dot"></div><span>Our host will contact you 24 hours before your arrival with check-in instructions.</span></div>
+    <div class="step-item"><div class="step-dot"></div><span>Show your Booking ID at check-in. Check-in time is 2:00 PM, check-out 11:00 AM.</span></div>
+  </div>
+
+  <div class="actions">
+    <a href="index.html" class="btn btn-primary btn-lg">&larr; Back to Home</a>
+    <a href="rooms.html" class="btn btn-ghost btn-lg">Browse More Rooms</a>
+    <a href="https://wa.me/254743788467" class="wa-btn" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+      WhatsApp Host
+    </a>
+  </div>
+</div>
+
+<div id="footer-slot"></div>
+<script src="shared.js"></script>
+<script>
+document.getElementById('nav-slot').innerHTML = navHTML('');
+document.getElementById('footer-slot').innerHTML = footerHTML();
+sharedInit();
+
+const p         = new URLSearchParams(location.search);
+const room      = getRoom(p.get('id')) || ROOMS[0];
+const nights    = parseInt(p.get('nights')) || 1;
+const total     = p.get('total') || room.price * nights;
+const checkin   = p.get('checkin')   || '';
+const checkout  = p.get('checkout')  || '';
+const guestName = p.get('name')      || 'Guest';
+const method    = p.get('method')    || 'M-Pesa';
+const receipt   = p.get('receipt')   || '';
+const bookingId = p.get('bookingId') || 'BNB' + Math.floor(Math.random() * 90000 + 10000);
+
+function fmt(d){
+  if(!d) return '&mdash;';
+  return new Date(d).toLocaleDateString('en-KE', {day:'numeric', month:'long', year:'numeric'});
+}
+
+document.getElementById('bookingCard').innerHTML = `
+  <div class="bk-header">
+    <div class="bk-header-img"><img src="${room.image}" alt="${room.name}"></div>
+    <div class="bk-header-text">
+      <h3>${room.name}</h3>
+      <p>${room.type} &middot; ${nights} night${nights > 1 ? 's' : ''}</p>
+    </div>
+  </div>
+  <div class="bk-body">
+    <div class="bk-row">
+      <span class="key">Booking ID</span>
+      <span class="val bid">${bookingId}</span>
+    </div>
+    <div class="bk-row">
+      <span class="key">Guest Name</span>
+      <span class="val">${guestName}</span>
+    </div>
+    <div class="bk-row">
+      <span class="key">Check-in</span>
+      <span class="val">${fmt(checkin)}</span>
+    </div>
+    <div class="bk-row">
+      <span class="key">Check-out</span>
+      <span class="val">${fmt(checkout)}</span>
+    </div>
+    <div class="bk-row">
+      <span class="key">Duration</span>
+      <span class="val">${nights} Night${nights > 1 ? 's' : ''}</span>
+    </div>
+    <div class="bk-row">
+      <span class="key">Total Paid</span>
+      <span class="val" style="color:var(--gold);font-size:1.1rem">${formatKES(total)}</span>
+    </div>
+    <div class="bk-row">
+      <span class="key">Payment Method</span>
+      <span class="val">${method}</span>
+    </div>
+    ${receipt ? `<div class="bk-row"><span class="key">M-Pesa Receipt</span><span class="val">${receipt}</span></div>` : ''}
+    <div class="bk-row">
+      <span class="key">Status</span>
+      <span class="val"><span class="paid-badge">&#10003; Paid &amp; Confirmed</span></span>
+    </div>
+  </div>
+`;
+</script>
+</body>
+</html>

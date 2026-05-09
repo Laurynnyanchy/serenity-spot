@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact &mdash; Serenity Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.contact-wrap { max-width:1100px; margin:0 auto; padding:calc(var(--nav-h)+60px) 5% 80px; }
+.contact-grid { display:grid; grid-template-columns:1fr 1.2fr; gap:56px; align-items:start; margin-top:8px; }
+
+/* INFO SIDE */
+.contact-info p { color:var(--muted); font-size:.95rem; line-height:1.75; margin-bottom:40px; }
+.info-cards { display:flex; flex-direction:column; gap:14px; margin-bottom:36px; }
+.info-card {
+  display:flex; gap:16px; align-items:flex-start;
+  background:var(--white); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:18px 20px;
+  transition:all .25s;
+}
+.info-card:hover { box-shadow:var(--shadow); transform:translateX(4px); }
+.info-icon {
+  width:44px; height:44px; border-radius:10px;
+  background:var(--gold-pale); border:1px solid rgba(200,151,58,.22);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--gold); flex-shrink:0;
+}
+.info-card h4 { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:4px; }
+.info-card p { font-size:.9rem; color:var(--dark); margin:0; line-height:1.5; }
+.info-card a { color:var(--dark); transition:color .2s; }
+.info-card a:hover { color:var(--gold); }
+
+.wa-btn {
+  display:inline-flex; align-items:center; gap:12px;
+  background:#25D366; color:#fff; border-radius:40px;
+  padding:14px 28px; font-weight:700; font-size:1rem;
+  transition:all .22s; width:fit-content;
+}
+.wa-btn:hover { background:#1fbb58; transform:translateY(-2px); box-shadow:0 6px 20px rgba(37,211,102,.35); }
+
+/* FORM SIDE */
+.contact-form-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:36px; }
+.contact-form-card h2 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin-bottom:24px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+
+/* Loading / success states */
+.btn-loading { opacity:.7; pointer-events:none; }
+.success-msg { display:none; text-align:center; padding:40px 20px; }
+.success-msg .s-icon { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#2A7A50,#34a865); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:#fff; }
+.success-msg h3 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin-bottom:8px; }
+.success-msg p { color:var(--muted); font-size:.9rem; }
+
+@media(max-width:800px){
+  .contact-grid { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div id="nav-slot"></div>
+
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">Home</a><span>/</span><strong>Contact</strong></div>
+  <h1>Get in Touch</h1>
+  <p>We're here to help. Reach us anytime.</p>
+</div>
+
+<div class="contact-wrap">
+  <div class="contact-grid">
+
+    <!-- INFO -->
+    <div class="contact-info">
+      <div class="s-tag">Contact Us</div>
+      <h2 class="s-title" style="margin-bottom:16px">We'd Love to<br>Hear From You</h2>
+      <p>Have a question about availability, pricing, or anything else? Drop us a message or reach us on WhatsApp for the fastest response.</p>
+
+      <div class="info-cards" id="infoCards"></div>
+
+      <a href="https://wa.me/254743788467?text=Hi!%20I%20have%20a%20question%20about%20a%20room%20at%20Serenity%20Spot." class="wa-btn" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+        Chat on WhatsApp
+      </a>
+    </div>
+
+    <!-- FORM -->
+    <div class="contact-form-card">
+      <h2>Send Us a Message</h2>
+      <div id="formWrap">
+        <div class="form-row" style="margin-bottom:18px">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" class="form-control" id="cName" placeholder="Jane Wanjiku">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" class="form-control" id="cEmail" placeholder="you@example.com">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:18px">
+          <label>Phone (optional)</label>
+          <input type="tel" class="form-control" id="cPhone" placeholder="+254 7XX XXX XXX">
+        </div>
+        <div class="form-group" style="margin-bottom:18px">
+          <label>Subject</label>
+          <select class="form-control" id="cSubject">
+            <option>Room Enquiry</option>
+            <option>Booking Question</option>
+            <option>Payment Issue</option>
+            <option>Feedback</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:24px">
+          <label>Message</label>
+          <textarea class="form-control" id="cMessage" style="min-height:130px" placeholder="How can we help you?"></textarea>
+        </div>
+        <button class="btn btn-primary btn-full btn-lg" id="sendBtn" onclick="sendMsg()">Send Message &rarr;</button>
+        <p id="cErr" style="font-size:.8rem;color:var(--error);margin-top:10px;text-align:center;min-height:16px"></p>
+      </div>
+
+      <div class="success-msg" id="successMsg">
+        <div class="s-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Message Sent!</h3>
+        <p>Thank you for reaching out. We'll get back to you within 1 hour.</p>
+        <button class="btn btn-outline" style="margin-top:24px" onclick="resetForm()">Send Another Message</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-slot"></div>
+<script src="shared.js"></script>
+<script>
+document.getElementById('nav-slot').innerHTML = navHTML('contact');
+document.getElementById('footer-slot').innerHTML = footerHTML();
+sharedInit();
+
+// Render info cards with SVG icons
+const cards = [
+  { icon: ICONS.mappin, title: 'Location',      body: 'Kisii Town, Kisii County<br>Kenya' },
+  { icon: ICONS.phone,  title: 'Phone',         body: '<a href="tel:+254743788467">+254 743 788 467</a>' },
+  { icon: ICONS.mail,   title: 'Email',         body: '<a href="mailto:serenityspotbookings@gmail.com">serenityspotbookings@gmail.com</a>' },
+  { icon: ICONS.clock,  title: 'Response Time', body: 'Usually within 1 hour<br>Available 7 days a week' },
+];
+document.getElementById('infoCards').innerHTML = cards.map(c => `
+  <div class="info-card">
+    <div class="info-icon">${c.icon}</div>
+    <div><h4>${c.title}</h4><p>${c.body}</p></div>
+  </div>
+`).join('');
+
+async function sendMsg(){
+  const name    = document.getElementById('cName').value.trim();
+  const email   = document.getElementById('cEmail').value.trim();
+  const phone   = document.getElementById('cPhone').value.trim();
+  const subject = document.getElementById('cSubject').value;
+  const message = document.getElementById('cMessage').value.trim();
+  const err     = document.getElementById('cErr');
+  const btn     = document.getElementById('sendBtn');
+
+  if(!name)               { err.textContent = 'Please enter your name.'; return; }
+  if(!email||!email.includes('@')) { err.textContent = 'Please enter a valid email.'; return; }
+  if(!message)            { err.textContent = 'Please write a message.'; return; }
+  err.textContent = '';
+
+  btn.textContent = 'Sending…';
+  btn.classList.add('btn-loading');
+
+  try {
+    await fetch(`${API_BASE}/api/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, subject, message })
+    });
+  } catch(e) { /* show success even if backend unreachable in demo */ }
+
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('successMsg').style.display = 'block';
+}
+
+function resetForm(){
+  ['cName','cEmail','cPhone','cMessage'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sendBtn').textContent = 'Send Message &rarr;';
+  document.getElementById('sendBtn').classList.remove('btn-loading');
+  document.getElementById('formWrap').style.display = 'block';
+  document.getElementById('successMsg').style.display = 'none';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rooms &mdash; Serenity Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.layout { display:grid; grid-template-columns:280px 1fr; gap:32px; padding:48px 5%; max-width:1400px; margin:0 auto; }
+
+/* SIDEBAR */
+.sidebar { position:sticky; top:calc(var(--nav-h) + 16px); height:fit-content; background:var(--white); border-radius:var(--radius); border:1px solid var(--border); padding:28px; }
+.sidebar h3 { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--dark); margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; }
+.sidebar h3 button { font-size:.75rem; color:var(--muted); background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; }
+.sidebar h3 button:hover { color:var(--gold); }
+
+.f-group { margin-bottom:28px; }
+.f-group h4 { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:14px; }
+
+.check-list { display:flex; flex-direction:column; gap:10px; }
+.check-item { display:flex; align-items:center; gap:10px; }
+.check-item input[type="checkbox"] { width:16px; height:16px; accent-color:var(--gold); cursor:pointer; }
+.check-item label { font-size:.9rem; cursor:pointer; flex:1; display:flex; justify-content:space-between; }
+.check-item label span { color:var(--muted); font-size:.8rem; }
+
+.price-vals { display:flex; justify-content:space-between; font-size:.82rem; margin-bottom:10px; }
+.price-vals b { color:var(--dark); }
+input[type=range] { width:100%; accent-color:var(--gold); height:4px; }
+
+.guests-ctrl { display:flex; align-items:center; gap:12px; background:var(--cream); border-radius:8px; padding:8px 12px; border:1px solid var(--border); }
+.guests-ctrl button { width:28px; height:28px; border-radius:50%; border:1.5px solid var(--border); background:var(--white); font-size:1.1rem; line-height:1; cursor:pointer; transition:all .2s; }
+.guests-ctrl button:hover { border-color:var(--gold); color:var(--gold); }
+.guests-ctrl span { flex:1; text-align:center; font-weight:700; font-size:1rem; }
+
+/* MAIN */
+.toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+.results-count { font-size:.9rem; color:var(--muted); }
+.results-count b { color:var(--dark); }
+.sort-sel { padding:9px 16px; border-radius:40px; border:1.5px solid var(--border); background:var(--white); font-family:'DM Sans',sans-serif; font-size:.85rem; color:var(--text); cursor:pointer; outline:none; }
+
+.rooms-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:24px; }
+.no-results { grid-column:1/-1; text-align:center; padding:64px 20px; color:var(--muted); }
+.no-results .icon { color:var(--gold); margin-bottom:16px; display:flex; justify-content:center; }
+.no-results h3 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin-bottom:8px; }
+
+/* MOBILE FILTER TOGGLE */
+.mob-filter-btn { display:none; }
+.sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:149; }
+.sidebar-overlay.open { display:block; }
+
+@media(max-width:860px){
+  .layout { grid-template-columns:1fr; }
+  .sidebar {
+    position:fixed; top:0; left:-320px; bottom:0; z-index:150;
+    border-radius:0; overflow-y:auto; width:300px;
+    transition:left .3s;
+  }
+  .sidebar.open { left:0; }
+  .mob-filter-btn { display:flex; align-items:center; gap:8px; }
+}
+</style>
+</head>
+<body>
+<div id="nav-slot"></div>
+
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">Home</a><span>/</span><strong>Rooms</strong></div>
+  <h1>Browse Our Rooms</h1>
+  <p>Choose the perfect space for your stay</p>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <h3>Filters <button onclick="clearFilters()">Clear all</button></h3>
+    <div class="f-group">
+      <h4>Room Type</h4>
+      <div class="check-list" id="typeFilters"></div>
+    </div>
+    <div class="f-group">
+      <h4>Max Price / Night</h4>
+      <div class="price-vals"><span>KES 1,000</span><b id="priceVal">KES 10,000</b></div>
+      <input type="range" id="priceSlider" min="1000" max="10000" value="10000" step="500" oninput="updatePrice(this.value);applyFilters()">
+    </div>
+    <div class="f-group">
+      <h4>Min. Guests Capacity</h4>
+      <div class="guests-ctrl">
+        <button onclick="changeGuests(-1)">−</button>
+        <span id="guestVal">1</span>
+        <button onclick="changeGuests(1)">+</button>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="applyFilters();closeSidebar()">Apply Filters</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="clearFilters()">Clear</button>
+  </aside>
+  <div class="sidebar-overlay" id="sovlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN -->
+  <main>
+    <div class="toolbar">
+      <div class="results-count"><b id="rCount">4</b> rooms available</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-ghost btn-sm mob-filter-btn" onclick="openSidebar()">⚙️ Filters</button>
+        <select class="sort-sel" id="sortSel" onchange="applyFilters()">
+          <option value="default">Sort: Default</option>
+          <option value="price-asc">Price: Low &rarr; High</option>
+          <option value="price-desc">Price: High &rarr; Low</option>
+          <option value="rating">Top Rated</option>
+        </select>
+      </div>
+    </div>
+    <div class="rooms-grid" id="roomsGrid"></div>
+  </main>
+</div>
+
+<div id="footer-slot"></div>
+<script src="shared.js"></script>
+<script>
+document.getElementById('nav-slot').innerHTML = navHTML('rooms');
+document.getElementById('footer-slot').innerHTML = footerHTML();
+sharedInit();
+
+// Build type filters dynamically from ROOMS data
+const typeCounts = {};
+ROOMS.forEach(r => { typeCounts[r.type] = (typeCounts[r.type]||0)+1; });
+const typeOrder = ['Studio','1 Bedroom','2 Bedroom','3 Bedroom','Suite','Apartment','Family'];
+const allTypes = [...new Set([...typeOrder.filter(t=>typeCounts[t]), ...Object.keys(typeCounts)])];
+document.getElementById('typeFilters').innerHTML = allTypes.map(t => {
+  const id = 'ft-' + t.toLowerCase().replace(/\s+/g,'-');
+  return `<div class="check-item">
+    <input type="checkbox" id="${id}" value="${t}" onchange="applyFilters()">
+    <label for="${id}">${t} <span>${typeCounts[t]||0}</span></label>
+  </div>`;
+}).join('');
+
+let guestMin = 1;
+
+function updatePrice(v){
+  document.getElementById('priceVal').textContent = 'KES '+Number(v).toLocaleString();
+}
+
+function changeGuests(d){
+  guestMin = Math.max(1, Math.min(6, guestMin+d));
+  document.getElementById('guestVal').textContent = guestMin;
+  applyFilters();
+}
+
+function clearFilters(){
+  document.querySelectorAll('.check-list input').forEach(c=>c.checked=false);
+  document.getElementById('priceSlider').value=10000;
+  updatePrice(10000);
+  guestMin=1; document.getElementById('guestVal').textContent='1';
+  applyFilters();
+}
+
+function applyFilters(){
+  const types = [...document.querySelectorAll('.check-list input:checked')].map(c=>c.value);
+  const maxPrice = +document.getElementById('priceSlider').value;
+  const sort = document.getElementById('sortSel').value;
+
+  let filtered = ROOMS.filter(r=>{
+    if(types.length && !types.includes(r.type)) return false;
+    if(r.price > maxPrice) return false;
+    if(r.people < guestMin) return false;
+    return true;
+  });
+
+  if(sort==='price-asc') filtered.sort((a,b)=>a.price-b.price);
+  else if(sort==='price-desc') filtered.sort((a,b)=>b.price-a.price);
+  else if(sort==='rating') filtered.sort((a,b)=>b.rating-a.rating);
+
+  document.getElementById('rCount').textContent = filtered.length;
+  const grid = document.getElementById('roomsGrid');
+
+  if(!filtered.length){
+    grid.innerHTML=`<div class="no-results"><div class="icon">${ICONS.search}</div><h3>No rooms match your filters</h3><p>Try adjusting your search criteria.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r=>`
+    <div class="room-card">
+      <div class="card-img-wrap">
+        <img class="room-card-img" src="${r.image}" alt="${r.name}" loading="lazy">
+        ${r.badge?`<div class="card-badge">${r.badge}</div>`:''}
+      </div>
+      <div class="card-body">
+        <div class="card-type">${r.type}</div>
+        <div class="card-name">${r.name}</div>
+        <div class="card-desc">${r.desc}</div>
+        <div class="card-meta">
+          <span style="display:flex;align-items:center;gap:4px">${ICONS.users} Up to ${r.people} guests</span>
+          <span class="rating-wrap">${renderStars(r.rating)} <span style="margin-left:4px">${r.rating}</span></span>
+        </div>
+        <div class="card-footer">
+          <div class="card-price">
+            <span class="amount">${formatKES(r.price)}</span>
+            <span class="per"> / night</span>
+          </div>
+          <a href="room_detail.html?id=${r.id}" class="btn btn-outline btn-sm">View Details</a>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sovlay').classList.add('open'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sovlay').classList.remove('open'); }
+
+const params = new URLSearchParams(location.search);
+if(params.get('guests')){
+  const g=parseInt(params.get('guests'));
+  if(g) { guestMin=g; document.getElementById('guestVal').textContent=g; }
+}
+applyFilters();
+</script>
+</body>
+</html>
