@@ -1,5 +1,8 @@
 // ─── CONFIG ────────────────────────────────────────────────────
-const API_BASE = 'https://serenity-spot-airbnb.com'; // Change to your deployed backend URL
+// Auto-detect: localhost for dev, Railway URL for production
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8000'
+  : 'https://serenity-spot-production.up.railway.app'; // <- Your Railway URL
 
 // ─── ROOMS DATA ────────────────────────────────────────────────
 const ROOMS = [
