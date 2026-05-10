@@ -1,5 +1,5 @@
 // ─── CONFIG ────────────────────────────────────────────────────
-const API_BASE = 'http://localhost:8000'; // Change to your deployed backend URL
+const API_BASE = 'https://serenity-spot-airbnb.com'; // Change to your deployed backend URL
 
 // ─── ROOMS DATA ────────────────────────────────────────────────
 const ROOMS = [
