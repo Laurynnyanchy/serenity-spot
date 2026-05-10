@@ -251,7 +251,7 @@ tbody tr:hover td{background:var(--cream);}
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="notif-dot" id="notifDot" style="display:none"></span>
       </button>
-      <a href="index.html" class="btn btn-ghost btn-sm">&larr; View Site</a>
+      <a href="index.html" class="btn btn-ghost btn-sm">← View Site</a>
     </div>
   </div>
 
@@ -265,7 +265,7 @@ tbody tr:hover td{background:var(--cream);}
       <div class="table-card">
         <div class="tc-head">
           <h3>Recent Bookings</h3>
-          <button class="btn btn-ghost btn-sm" onclick="showPanel('bookings',document.getElementById('nav-bookings'))">View All &rarr;</button>
+          <button class="btn btn-ghost btn-sm" onclick="showPanel('bookings',document.getElementById('nav-bookings'))">View All →</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -481,7 +481,9 @@ tbody tr:hover td{background:var(--cream);}
 </div>
 
 <script>
-const API_BASE = 'http://localhost:8000';
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8000'
+  : 'https://serenity-spot-production.up.railway.app';
 
 /* ── AUTH GUARD ─────────────────────────────────────────────── */
 const token   = localStorage.getItem('ss_token');
@@ -503,14 +505,14 @@ const authHeaders = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'appli
 
 /* ── HELPERS ────────────────────────────────────────────────── */
 function fmtKES(n)   { return 'KES ' + Number(n || 0).toLocaleString(); }
-function fmtDate(d)  { return d ? new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}) : '&mdash;'; }
-function fmtDT(d)    { return d ? new Date(d).toLocaleString('en-KE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '&mdash;'; }
+function fmtDate(d)  { return d ? new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
+function fmtDT(d)    { return d ? new Date(d).toLocaleString('en-KE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'; }
 
 function badge(s) {
   const map = { confirmed:'b-green', pending:'b-gold', cancelled:'b-red', completed:'b-blue',
                 paid:'b-green', failed:'b-red', approved:'b-green', flagged:'b-red',
                 admin:'b-gold', guest:'b-gray' };
-  return `<span class="badge ${map[s]||'b-gray'}">${s||'&mdash;'}</span>`;
+  return `<span class="badge ${map[s]||'b-gray'}">${s||'—'}</span>`;
 }
 
 function safeJSON(obj) {
@@ -614,9 +616,9 @@ async function loadStats() {
       const bks = await rb.json();
       document.getElementById('recentBookings').innerHTML = bks.slice(0, 8).map(b => `
         <tr onclick="openBookingDetail(${safeJSON(b)})">
-          <td class="td-id">${b.id || '&mdash;'}</td>
-          <td>${b.guest_name || '&mdash;'}</td>
-          <td>${b.room_name || '&mdash;'}</td>
+          <td class="td-id">${b.id || '—'}</td>
+          <td>${b.guest_name || '—'}</td>
+          <td>${b.room_name || '—'}</td>
           <td>${fmtDate(b.checkin_date)}</td>
           <td style="font-weight:700">${fmtKES(b.total_amount)}</td>
           <td>${badge(b.status)}</td>
@@ -678,12 +680,12 @@ function openRoomDetail(r) {
     <div class="detail-row"><span class="key">Type</span><span class="val">${r.type}</span></div>
     <div class="detail-row"><span class="key">Price</span><span class="val" style="color:var(--gold)">${fmtKES(r.price)} / night</span></div>
     <div class="detail-row"><span class="key">Max Guests</span><span class="val">${r.max_people}</span></div>
-    <div class="detail-row"><span class="key">Rating</span><span class="val">${r.rating || '&mdash;'} &#11088; (${r.review_count || 0} reviews)</span></div>
+    <div class="detail-row"><span class="key">Rating</span><span class="val">${r.rating || '—'} &#11088; (${r.review_count || 0} reviews)</span></div>
     <div class="detail-row"><span class="key">Status</span><span class="val">${r.is_available ? '<span class="badge b-green">Available</span>' : '<span class="badge b-red">Occupied</span>'}</span></div>
     ${r.description ? `<p style="margin-top:14px;font-size:.875rem;color:var(--muted);line-height:1.7">${r.description}</p>` : ''}
     <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
       <button class="btn btn-primary btn-sm" onclick="closeModal('roomModal');openEditRoom(${safeJSON(r)})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit Room</button>
-      <a href="room_detail.html?id=${r.id}" target="_blank" class="btn btn-ghost btn-sm">&larr; View Site</a>
+      <a href="room_detail.html?id=${r.id}" target="_blank" class="btn btn-ghost btn-sm">← View Site</a>
       <button class="btn btn-sm ${r.is_available ? 'btn-danger' : 'btn-success'}" onclick="toggleAvail(${r.id},${r.is_available});closeModal('roomModal')">
         ${r.is_available ? 'Mark Occupied' : 'Mark Available'}
       </button>
@@ -757,14 +759,14 @@ function renderBookings() {
   if (!bookings.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">No bookings found</td></tr>'; return; }
   tbody.innerHTML = bookings.map(b => `
     <tr onclick="openBookingDetail(${safeJSON(b)})">
-      <td class="td-id">${b.id || '&mdash;'}</td>
+      <td class="td-id">${b.id || '—'}</td>
       <td>
-        <div style="font-weight:600">${b.guest_name || '&mdash;'}</div>
+        <div style="font-weight:600">${b.guest_name || '—'}</div>
         <div style="font-size:.72rem;color:var(--muted)">${b.guest_email || ''}</div>
       </td>
-      <td>${b.room_name || '&mdash;'}</td>
-      <td style="font-size:.8rem">${fmtDate(b.checkin_date)} &rarr; ${fmtDate(b.checkout_date)}</td>
-      <td style="text-align:center">${b.nights || '&mdash;'}</td>
+      <td>${b.room_name || '—'}</td>
+      <td style="font-size:.8rem">${fmtDate(b.checkin_date)} → ${fmtDate(b.checkout_date)}</td>
+      <td style="text-align:center">${b.nights || '—'}</td>
       <td style="font-weight:700">${fmtKES(b.total_amount)}</td>
       <td>${badge(b.status)}</td>
       <td onclick="event.stopPropagation()">
@@ -779,15 +781,15 @@ function renderBookings() {
 
 function openBookingDetail(b) {
   document.getElementById('bookingModalBody').innerHTML = `
-    <div class="detail-row"><span class="key">Booking ID</span><span class="val" style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem">${b.id || '&mdash;'}</span></div>
-    <div class="detail-row"><span class="key">Guest Name</span><span class="val">${b.guest_name || '&mdash;'}</span></div>
-    <div class="detail-row"><span class="key">Email</span><span class="val">${b.guest_email || '&mdash;'}</span></div>
-    <div class="detail-row"><span class="key">Phone</span><span class="val">${b.guest_phone || '&mdash;'}</span></div>
-    <div class="detail-row"><span class="key">Room</span><span class="val">${b.room_name || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Booking ID</span><span class="val" style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem">${b.id || '—'}</span></div>
+    <div class="detail-row"><span class="key">Guest Name</span><span class="val">${b.guest_name || '—'}</span></div>
+    <div class="detail-row"><span class="key">Email</span><span class="val">${b.guest_email || '—'}</span></div>
+    <div class="detail-row"><span class="key">Phone</span><span class="val">${b.guest_phone || '—'}</span></div>
+    <div class="detail-row"><span class="key">Room</span><span class="val">${b.room_name || '—'}</span></div>
     <div class="detail-row"><span class="key">Check-in</span><span class="val">${fmtDate(b.checkin_date)}</span></div>
     <div class="detail-row"><span class="key">Check-out</span><span class="val">${fmtDate(b.checkout_date)}</span></div>
-    <div class="detail-row"><span class="key">Nights</span><span class="val">${b.nights || '&mdash;'}</span></div>
-    <div class="detail-row"><span class="key">Guests</span><span class="val">${b.guest_count || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Nights</span><span class="val">${b.nights || '—'}</span></div>
+    <div class="detail-row"><span class="key">Guests</span><span class="val">${b.guest_count || '—'}</span></div>
     <div class="detail-row"><span class="key">Total</span><span class="val" style="color:var(--gold)">${fmtKES(b.total_amount)}</span></div>
     <div class="detail-row"><span class="key">Status</span><span class="val">${badge(b.status)}</span></div>
     ${b.special_requests ? `<div class="detail-row"><span class="key">Special Requests</span><span class="val" style="max-width:58%;text-align:right">${b.special_requests}</span></div>` : ''}
@@ -831,9 +833,9 @@ function renderPayments(filterStatus) {
   if (filterStatus === 'pending')   data = data.filter(b => b.status === 'pending');
   document.getElementById('payTable').innerHTML = data.map(b => `
     <tr onclick="openBookingDetail(${safeJSON(b)})">
-      <td class="td-id">${b.id || '&mdash;'}</td>
-      <td>${b.guest_name || '&mdash;'}</td>
-      <td>${b.room_name || '&mdash;'}</td>
+      <td class="td-id">${b.id || '—'}</td>
+      <td>${b.guest_name || '—'}</td>
+      <td>${b.room_name || '—'}</td>
       <td style="font-weight:700">${fmtKES(b.total_amount)}</td>
       <td>${fmtDate(b.checkin_date)}</td>
       <td>${badge(b.status)}</td>
@@ -871,7 +873,7 @@ function renderReviews() {
           <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b5832a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">${(r.guest_name||'G')[0].toUpperCase()}</div>
           <div>
             <div style="font-weight:700;font-size:.9rem">${r.guest_name || 'Guest'}</div>
-            <div style="font-size:.75rem;color:var(--muted)">${r.room_name || 'Room'} &middot; ${fmtDate(r.created_at)}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${r.room_name || 'Room'} · ${fmtDate(r.created_at)}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
@@ -892,8 +894,8 @@ function renderReviews() {
 
 function openReviewDetail(r) {
   document.getElementById('reviewModalBody').innerHTML = `
-    <div class="detail-row"><span class="key">Guest</span><span class="val">${r.guest_name || '&mdash;'}</span></div>
-    <div class="detail-row"><span class="key">Room</span><span class="val">${r.room_name || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Guest</span><span class="val">${r.guest_name || '—'}</span></div>
+    <div class="detail-row"><span class="key">Room</span><span class="val">${r.room_name || '—'}</span></div>
     <div class="detail-row"><span class="key">Rating</span><span class="val">${[...Array(r.rating||0)].map(()=>"<svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='color:var(--gold)'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>").join('')} (${r.rating}/5)</span></div>
     <div class="detail-row"><span class="key">Status</span><span class="val">${badge(r.status)}</span></div>
     <div class="detail-row"><span class="key">Submitted</span><span class="val">${fmtDT(r.created_at)}</span></div>
@@ -947,8 +949,8 @@ async function loadMessages() {
       <div class="msg-card ${m.is_read ? '' : 'unread'}" id="mc-${m.id}" onclick="openMessageDetail(${safeJSON(m)})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
           <div>
-            <div style="font-weight:700;font-size:.9rem">${m.name || '&mdash;'} <span style="font-weight:400;color:var(--muted);font-size:.8rem">&lt;${m.email || ''}&gt;</span></div>
-            <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-top:2px">${m.subject || '&mdash;'}</div>
+            <div style="font-weight:700;font-size:.9rem">${m.name || '—'} <span style="font-weight:400;color:var(--muted);font-size:.8rem">&lt;${m.email || ''}&gt;</span></div>
+            <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-top:2px">${m.subject || '—'}</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
             ${!m.is_read ? '<span class="badge b-gold">New</span>' : ''}
@@ -964,10 +966,10 @@ async function loadMessages() {
 
 function openMessageDetail(m) {
   document.getElementById('messageModalBody').innerHTML = `
-    <div class="detail-row"><span class="key">From</span><span class="val">${m.name || '&mdash;'}</span></div>
-    <div class="detail-row"><span class="key">Email</span><span class="val">${m.email || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">From</span><span class="val">${m.name || '—'}</span></div>
+    <div class="detail-row"><span class="key">Email</span><span class="val">${m.email || '—'}</span></div>
     ${m.phone ? `<div class="detail-row"><span class="key">Phone</span><span class="val">${m.phone}</span></div>` : ''}
-    <div class="detail-row"><span class="key">Subject</span><span class="val">${m.subject || '&mdash;'}</span></div>
+    <div class="detail-row"><span class="key">Subject</span><span class="val">${m.subject || '—'}</span></div>
     <div class="detail-row"><span class="key">Received</span><span class="val">${fmtDT(m.created_at)}</span></div>
     <div class="detail-row"><span class="key">Status</span><span class="val">${m.is_read ? '<span class="badge b-green">Read</span>' : '<span class="badge b-gold">Unread</span>'}</span></div>
     <div style="margin-top:16px;background:var(--cream);border-radius:10px;padding:18px;font-size:.9rem;line-height:1.8;white-space:pre-wrap">${m.message || ''}</div>
@@ -1017,8 +1019,8 @@ function renderGuests(data) {
   tbody.innerHTML = data.map(g => `
     <tr>
       <td style="font-weight:600">${g.first_name || ''} ${g.last_name || ''}</td>
-      <td style="color:var(--muted);font-size:.82rem">${g.email || '&mdash;'}</td>
-      <td style="font-size:.82rem">${g.phone || '&mdash;'}</td>
+      <td style="color:var(--muted);font-size:.82rem">${g.email || '—'}</td>
+      <td style="font-size:.82rem">${g.phone || '—'}</td>
       <td>${badge(g.role)}</td>
       <td style="font-size:.78rem;color:var(--muted)">${fmtDate(g.created_at)}</td>
       <td>
