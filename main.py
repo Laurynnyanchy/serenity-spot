@@ -338,21 +338,9 @@ async def lifespan(app: FastAPI):
 
 # ── APP ───────────────────────────────────────────────────────────
 app = FastAPI(title="Serenity Spot API", version="2.1.0", lifespan=lifespan)
-# Allow localhost for dev + your Netlify domain for production
-ALLOWED_ORIGINS = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://127.0.0.1",
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    getenv("FRONTEND_URL", ""),  # Set this to your Netlify URL in Railway env vars
-]
-ALLOWED_ORIGINS = [o for o in ALLOWED_ORIGINS if o]  # remove empty
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_origin_regex=r"https://.*\.netlify\.app",  # allows all netlify subdomains
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -510,6 +498,11 @@ async def register(req: RegisterIn, db=Depends(get_db)):
         raise HTTPException(400, "Email already registered")
     if len(req.password) < 8:
         raise HTTPException(400, "Password must be at least 8 characters")
+    # Basic phone validation
+    import re as _re
+    ph = req.phone.strip().replace(' ','').replace('-','')
+    if not _re.match(r'^(\+254|254|07|01)\d{8,9}$', ph):
+        raise HTTPException(400, "Enter a valid Kenyan phone number e.g. 0712345678")
     pw = hash_pw(req.password)
     await db.execute(
         "INSERT INTO users (first_name,last_name,email,phone,password_hash,role) VALUES (%s,%s,%s,%s,%s,'guest')",
@@ -638,8 +631,8 @@ async def create_booking(req: BookingIn, db=Depends(get_db)):
         bid = new_booking_id()
 
     subtotal    = room["price"] * req.nights
-    service_fee = round(subtotal * 0.05)
-    total       = subtotal + service_fee
+    service_fee = 0  # Service fee removed
+    total       = subtotal
 
     await db.execute(
         """INSERT INTO bookings
@@ -1000,10 +993,10 @@ async def admin_stats(db=Depends(get_db), _=Depends(require_admin)):
 
     return {
         "total_bookings":   await q("SELECT COUNT(*) FROM bookings"),
-        "confirmed":        await q("SELECT COUNT(*) FROM bookings WHERE status='confirmed'"),
+        "confirmed":        await q("SELECT COUNT(*) FROM bookings WHERE status IN ('confirmed','completed')"),
         "pending_bookings": await q("SELECT COUNT(*) FROM bookings WHERE status='pending'"),
         "total_revenue":    await q("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid'"),
-        "total_guests":     await q("SELECT COUNT(*) FROM users WHERE role='guest'"),
+        "total_guests":     await q("SELECT COUNT(*) FROM users WHERE role='guest' AND is_active=1"),
         "pending_reviews":  await q("SELECT COUNT(*) FROM reviews WHERE status='pending'"),
         "unread_messages":  await q("SELECT COUNT(*) FROM contact_messages WHERE is_read=0"),
         "available_rooms":  await q("SELECT COUNT(*) FROM rooms WHERE is_available=1"),

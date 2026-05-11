@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact &mdash; Serenity Spot</title>
+<title>Contact — Serenity Spot</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
@@ -115,7 +115,7 @@
           <label>Message</label>
           <textarea class="form-control" id="cMessage" style="min-height:130px" placeholder="How can we help you?"></textarea>
         </div>
-        <button class="btn btn-primary btn-full btn-lg" id="sendBtn" onclick="sendMsg()">Send Message &rarr;</button>
+        <button class="btn btn-primary btn-full btn-lg" id="sendBtn" onclick="sendMsg()">Send Message →</button>
         <p id="cErr" style="font-size:.8rem;color:var(--error);margin-top:10px;text-align:center;min-height:16px"></p>
       </div>
 
@@ -166,7 +166,7 @@ async function sendMsg(){
   if(!message)            { err.textContent = 'Please write a message.'; return; }
   err.textContent = '';
 
-  btn.textContent = 'Sending…';
+  btn.innerHTML = 'Sending&hellip;';
   btn.classList.add('btn-loading');
 
   try {
@@ -183,7 +183,7 @@ async function sendMsg(){
 
 function resetForm(){
   ['cName','cEmail','cPhone','cMessage'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('sendBtn').textContent = 'Send Message &rarr;';
+  document.getElementById('sendBtn').textContent = 'Send Message →';
   document.getElementById('sendBtn').classList.remove('btn-loading');
   document.getElementById('formWrap').style.display = 'block';
   document.getElementById('successMsg').style.display = 'none';

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payment &mdash; Serenity Spot</title>
+<title>Payment — Serenity Spot</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
@@ -90,9 +90,9 @@
 
   <!-- STEPS -->
   <div class="steps">
-    <div class="step done"><div class="step-num">&#10003;</div><div class="step-label">Room</div></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-label">Room</div></div>
     <div class="step-line done"></div>
-    <div class="step done"><div class="step-num">&#10003;</div><div class="step-label">Your Details</div></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-label">Your Details</div></div>
     <div class="step-line done"></div>
     <div class="step active"><div class="step-num">3</div><div class="step-label">Payment</div></div>
     <div class="step-line"></div>
@@ -112,7 +112,7 @@
   <div class="pay-panel" id="panelMpesa">
     <div class="mpesa-logo">
       <div class="mpesa-badge">M-PESA</div>
-      <div class="mpesa-desc">Safaricom Daraja API &middot; Instant STK Push</div>
+      <div class="mpesa-desc">Safaricom Daraja API · Instant STK Push</div>
     </div>
     <p style="font-size:.875rem;color:var(--muted);line-height:1.7;margin-bottom:16px">You will receive an M-Pesa prompt on your phone. Enter your PIN to complete the payment.</p>
     <div class="stk-steps">
@@ -163,12 +163,12 @@
     </div>
 
     <button class="btn btn-primary btn-full btn-lg" style="margin-top:4px" id="cardPayBtn" onclick="payCard()">
-      💳 Pay Now &mdash; Secure Checkout
+      💳 Pay Now — Secure Checkout
     </button>
     <p id="cardErr" style="font-size:.8rem;color:var(--error);min-height:16px;text-align:center;margin-top:10px"></p>
 
     <p style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:16px">
-      &#128274; Secured by <strong>Flutterwave</strong> &middot; PCI DSS Compliant &middot; 256-bit SSL
+      🔒 Secured by <strong>Flutterwave</strong> · PCI DSS Compliant · 256-bit SSL
     </p>
   </div>
 </div>
@@ -177,7 +177,7 @@
 <div class="processing-overlay" id="procOverlay">
   <div class="proc-card">
     <div class="proc-spinner" id="procSpinner"></div>
-    <div id="procCheckIcon" style="display:none;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#2A7A50,#34a865);align-items:center;justify-content:center;margin:0 auto 24px;color:#fff">&#10003;</div>
+    <div id="procCheckIcon" style="display:none;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#2A7A50,#34a865);align-items:center;justify-content:center;margin:0 auto 24px;color:#fff">✓</div>
     <h3 id="procTitle">Sending STK Push…</h3>
     <p id="procMsg">Check your phone and enter your M-Pesa PIN.</p>
     <div id="procStatusBadge" class="proc-status pending" style="margin:0 auto">Processing…</div>
@@ -195,14 +195,14 @@ sharedInit();
 const p = new URLSearchParams(location.search);
 const room = getRoom(p.get('id')) || ROOMS[0];
 const nights = parseInt(p.get('nights'))||1;
-const total = parseInt(p.get('total')) || room.price * nights;
+const total = parseInt(p.get('total')) || room.price * nights; // fee already removed
 const checkin = p.get('checkin')||'';
 const checkout = p.get('checkout')||'';
 const guestName = p.get('name')||'';
 const phone = p.get('phone')||'';
 const bookingId = p.get('bookingId') || 'BNB'+Math.floor(Math.random()*90000+10000);
 
-function fmt(d){ if(!d) return '&mdash;'; return new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}); }
+function fmt(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}); }
 
 document.getElementById('paySummary').innerHTML = `
   <div class="pay-sum-img"><img src="${room.image}" alt="${room.name}"></div>
@@ -232,35 +232,41 @@ function switchTab(tab, btn){
 let currentCheckoutId = null;
 
 async function payMpesa(){
-  const ph = document.getElementById('mpesaPhone').value.trim();
+  const ph = document.getElementById('mpesaPhone').value.trim().replace(/\s/g,'');
   const err = document.getElementById('mpesaErr');
-  if(!ph || ph.length < 9){ err.textContent='Enter a valid 9-digit Safaricom number.'; return; }
+
+  // Validation
+  if(!ph){ err.textContent='Please enter your M-Pesa phone number.'; return; }
+  if(!/^\d{9}$/.test(ph)){ err.textContent='Enter 9 digits after +254 e.g. 712 345 678'; return; }
   err.textContent='';
 
-  // Show processing overlay
-  showProcessing('Sending STK Push…', `Check your phone (+254${ph}) and enter your M-Pesa PIN.`, 'pending');
+  const fullPhone = '254'+ph;
+  showProcessing('Sending STK Push...', 'Check your phone (+254'+ph+') and enter your M-Pesa PIN.', 'pending');
   document.getElementById('procCancelBtn').style.display = 'inline-flex';
 
   try{
-    // Initiate real Daraja STK Push
+    // Add 15s timeout to the STK push request
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 15000);
+
     const result = await initiateMpesaPayment({
-      phone: '254'+ph,
+      phone: fullPhone,
       amount: total,
       accountRef: bookingId,
       description: 'Serenity Spot'
     });
+    clearTimeout(timeout);
 
     currentCheckoutId = result.checkout_request_id;
-    showProcessing('Waiting for M-Pesa PIN…', `STK push sent to +254${ph}. Please enter your PIN on your phone.`, 'pending');
+    showProcessing('Waiting for PIN...', 'STK push sent to +254'+ph+'. Enter your M-Pesa PIN on your phone within 60 seconds.', 'pending');
 
-    // Poll for payment status
-    const payResult = await pollPaymentStatus(currentCheckoutId);
-    
-    // Payment confirmed
+    // Poll every 3s, max 20 attempts (60 seconds)
+    const payResult = await pollPaymentStatus(currentCheckoutId, 20, 3000);
+
     document.getElementById('procCancelBtn').style.display = 'none';
     document.getElementById('procSpinner').style.display = 'none';
-    showProcessing('Payment Confirmed!', 'Your payment was received. Redirecting to confirmation…', 'success');
-    
+    showProcessing('Payment Confirmed!', 'Payment received. Redirecting to your booking confirmation...', 'success');
+
     setTimeout(()=>{
       const qs = new URLSearchParams({
         id:room.id, checkin, checkout, nights, total,
@@ -268,16 +274,22 @@ async function payMpesa(){
         receipt: payResult.receipt||''
       });
       window.location = 'confirmation.html?' + qs.toString();
-    }, 2000);
+    }, 1500);
 
   } catch(e){
     document.getElementById('procCancelBtn').style.display = 'none';
     document.getElementById('procSpinner').style.display = 'none';
-    showProcessing('Payment Failed', e.message||'Payment was not completed. Please try again.', 'error');
+    const msg = e.message||'Payment not completed.';
+    const hint = msg.includes('abort')||msg.includes('timeout')
+      ? 'Request timed out. Check your M-Pesa is active and try again.'
+      : msg.includes('cancelled')
+      ? 'You cancelled the M-Pesa request. Tap Pay again to retry.'
+      : msg;
+    showProcessing('Payment Failed', hint, 'error');
     setTimeout(()=>{
       document.getElementById('procOverlay').classList.remove('show');
       document.getElementById('procSpinner').style.display = 'block';
-    }, 3000);
+    }, 4000);
   }
 }
 
@@ -292,7 +304,7 @@ function showProcessing(title, msg, status){
   document.getElementById('procMsg').textContent = msg;
   const badge = document.getElementById('procStatusBadge');
   badge.className = 'proc-status '+status;
-  badge.textContent = status==='pending'?'Processing…':status==='success'?'&#10003; Confirmed':'&#10007; Failed';
+  badge.textContent = status==='pending'?'Processing…':status==='success'?'✓ Confirmed':'✕ Failed';
 }
 
 // ── Pre-fill card summary panel ───────────────────────────────
@@ -318,7 +330,7 @@ function payCard(){
   const err = document.getElementById('cardErr');
 
   if(!FLW_PUBLIC_KEY){
-    err.textContent = 'Card payments not yet configured &mdash; add FLW_PUBLIC_KEY and FLW_SECRET_KEY to your .env and restart.';
+    err.textContent = 'Card payments not yet configured — add FLW_PUBLIC_KEY and FLW_SECRET_KEY to your .env and restart.';
     return;
   }
 
@@ -352,7 +364,7 @@ function launchFlutterwave(){
     },
     customizations: {
       title:       'Serenity Spot',
-      description: `Booking ${bookingId} &mdash; ${room.name} (${nights} night${nights>1?'s':''})`,
+      description: `Booking ${bookingId} — ${room.name} (${nights} night${nights>1?'s':''})`,
       logo:        'https://i.imgur.com/placeholder.png', // replace with your logo URL
     },
     meta: {
@@ -401,7 +413,7 @@ function launchFlutterwave(){
       }
     },
     onclose: function() {
-      // User closed the popup without paying &mdash; do nothing, let them retry
+      // User closed the popup without paying — do nothing, let them retry
       document.getElementById('cardErr').textContent = 'Payment window closed. Click Pay Now to try again.';
     }
   });

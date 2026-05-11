@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Serenity Spot &mdash; Premium Kisii AirBnB </title>
+<title>Serenity Spot — Premium Kisii AirBnB </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
@@ -155,9 +155,9 @@
   <div class="hero-overlay"></div>
   <div class="hero-glow"></div>
   <div class="hero-content">
-    <div class="eyebrow">&#10022; Premium Accommodation &middot; Kisii, Kenya</div>
+    <div class="eyebrow">✦ Premium Accommodation · Kisii, Kenya</div>
     <h1>Find Your <em>Perfect</em><br>Stay</h1>
-    <p class="hero-sub">Comfortable, clean and affordable rooms in the heart of Kisii.<br>Book in minutes &mdash; no hidden fees.</p>
+    <p class="hero-sub">Comfortable, clean and affordable rooms in the heart of Kisii.<br>Book in minutes — no hidden fees.</p>
 
     <div class="search-box">
       <div class="s-field">
@@ -191,7 +191,7 @@
   <div class="s-head">
     <div class="s-tag">Featured Rooms</div>
     <h2 class="s-title">Handpicked Accommodation</h2>
-    <p class="s-sub">From cozy studios to spacious family suites &mdash; a room for every need</p>
+    <p class="s-sub">From cozy studios to spacious family suites — a room for every need</p>
   </div>
   <div class="rooms-grid" id="featuredGrid"></div>
   <div class="view-all-wrap">
@@ -288,10 +288,10 @@ document.getElementById('featuredGrid').innerHTML = ROOMS.slice(0,3).map(r=>`
 // Why us
 const whyItems = [
   {icon:ICONS.money, title:'Affordable Rates', desc:'Competitive pricing with no hidden charges. Best rates guaranteed when you book direct.'},
-  {icon:ICONS.shield, title:'Secure Payments', desc:'M-Pesa STK push and card payments &mdash; safe, fast and confirmed instantly.'},
+  {icon:ICONS.shield, title:'Secure Payments', desc:'M-Pesa STK push and card payments — safe, fast and confirmed instantly.'},
   {icon:ICONS.sparkle, title:'Spotlessly Clean', desc:'Every room professionally cleaned and inspected before your arrival, always.'},
   {icon:ICONS.mappin, title:'Prime Location', desc:'Minutes from Kisii town centre, restaurants and major attractions.'},
-  {icon:ICONS.wifi, title:'Fast WiFi', desc:'High-speed fibre internet in every room &mdash; work remotely or stream without limits.'},
+  {icon:ICONS.wifi, title:'Fast WiFi', desc:'High-speed fibre internet in every room — work remotely or stream without limits.'},
   {icon:ICONS.verified, title:'Verified Reviews', desc:'100% real guest reviews so you know exactly what to expect before you book.'},
 ];
 document.getElementById('whyGrid').innerHTML = whyItems.map(w=>`
@@ -312,7 +312,7 @@ document.getElementById('testiGrid').innerHTML = testis.map(t=>`
   <div class="testi-card">
     <div class="testi-stars">${Array(t.stars).fill(ICONS.star).join('')}</div>
     <p class="testi-text">"${t.text}"</p>
-    <div class="testi-author">&mdash; ${t.author}</div>
+    <div class="testi-author">— ${t.author}</div>
   </div>
 `).join('');
 </script>

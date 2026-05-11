@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register &mdash; Serenity Spot</title>
+<title>Register — Serenity Spot</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
@@ -135,15 +135,15 @@ function togglePw(id, btn){
 function checkStrength(pw){
   const bar  = document.getElementById('pwBar');
   const hint = document.getElementById('pwHint');
-  if(!pw){ bar.className='pw-strength'; hint.textContent=''; return; }
+  if(!pw){ bar.className='pw-strength'; hint.innerHTML=''; return; }
   const hasLower = /[a-z]/.test(pw);
   const hasUpper = /[A-Z]/.test(pw);
   const hasNum   = /\d/.test(pw);
   const hasSpec  = /[!@#$%^&*]/.test(pw);
   const score    = [hasLower,hasUpper,hasNum,hasSpec,pw.length>=8].filter(Boolean).length;
-  if(score <= 2){ bar.className='pw-strength weak';   hint.textContent='Weak &mdash; add numbers and symbols'; }
-  else if(score <= 3){ bar.className='pw-strength fair';   hint.textContent='Fair &mdash; try adding uppercase letters'; }
-  else { bar.className='pw-strength strong'; hint.textContent='Strong password &#10003;'; }
+  if(score <= 2){ bar.className='pw-strength weak';   hint.innerHTML='<span style="color:#e74c3c">Weak &mdash; add numbers and symbols</span>'; }
+  else if(score <= 3){ bar.className='pw-strength fair'; hint.innerHTML='<span style="color:#f39c12">Fair &mdash; try adding uppercase letters</span>'; }
+  else { bar.className='pw-strength strong'; hint.innerHTML='<span style="color:#2A7A50">Strong password &#10003;</span>'; }
 }
 
 async function doRegister(){
@@ -158,14 +158,16 @@ async function doRegister(){
   const btn   = document.getElementById('regBtn');
 
   if(!first||!last)          { err.textContent='Enter your full name.'; return; }
-  if(!email||!email.includes('@')) { err.textContent='Enter a valid email.'; return; }
-  if(!phone)                 { err.textContent='Enter your phone number.'; return; }
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Enter a valid email address.'; return; }
+  if(!phone){ err.textContent='Enter your phone number.'; return; }
+  const cleanPhone = phone.replace(/[\s\-]/g,'');
+  if(!/^(\+254|254|07|01)\d{8,9}$/.test(cleanPhone)){ err.textContent='Enter a valid Kenyan phone number e.g. 07XX XXX XXX'; return; }
   if(pw.length < 8)          { err.textContent='Password must be at least 8 characters.'; return; }
   if(pw !== pw2)             { err.textContent='Passwords do not match.'; return; }
   if(!terms)                 { err.textContent='Please accept the terms to continue.'; return; }
   err.textContent = '';
 
-  btn.textContent = 'Creating account…';
+  btn.innerHTML = 'Creating account&hellip;';
   btn.classList.add('btn-loading');
 
   try {
@@ -177,12 +179,11 @@ async function doRegister(){
     const data = await resp.json();
     if(!resp.ok) throw new Error(data.detail || 'Registration failed');
 
-    localStorage.setItem('ss_token', data.token);
-    localStorage.setItem('ss_user', JSON.stringify(data.user));
-    window.location = 'index.html';
+    // Redirect to login so user logs in properly
+    window.location = 'login.html?registered=1&email='+encodeURIComponent(email);
   } catch(e) {
     err.textContent = e.message;
-    btn.textContent = 'Create Account &rarr;';
+    btn.innerHTML = 'Create Account &rarr;';
     btn.classList.remove('btn-loading');
   }
 }

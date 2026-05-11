@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Room Details &mdash; Serenity Spot</title>
+<title>Room Details — Serenity Spot</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
@@ -55,7 +55,7 @@
 .star-picker button { background:none; border:none; font-size:1.6rem; cursor:pointer; color:var(--border); transition:color .15s; line-height:1; }
 .star-picker button.lit { color:var(--gold); }
 
-/* RIGHT &mdash; BOOKING BOX */
+/* RIGHT — BOOKING BOX */
 .booking-box {
   background:var(--white); border:1px solid var(--border);
   border-radius:var(--radius); padding:28px;
@@ -110,7 +110,7 @@ sharedInit();
 
 const params = new URLSearchParams(location.search);
 const room = getRoom(params.get('id')) || ROOMS[0];
-document.title = room.name + ' &mdash; Serenity Spot';
+document.title = room.name + ' — Serenity Spot';
 
 // GALLERY
 document.getElementById('gallery').innerHTML = `
@@ -122,7 +122,7 @@ document.getElementById('gallery').innerHTML = `
 // LEFT
 document.getElementById('detailLeft').innerHTML = `
   <div class="detail-breadcrumb">
-    <a href="rooms.html">&larr; All Rooms</a>
+    <a href="rooms.html">← All Rooms</a>
     <span>/</span><span>${room.type}</span>
     <span>/</span><span>${room.name}</span>
   </div>
@@ -131,7 +131,7 @@ document.getElementById('detailLeft').innerHTML = `
   <div class="detail-meta">
     <div class="detail-meta-item">${ICONS.users} Up to ${room.people} guests</div>
     <div class="detail-meta-item"><span class="rating-wrap">${renderStars(room.rating)}</span> ${room.rating} &middot; ${room.reviews} reviews</div>
-    <div class="detail-meta-item" style="color:${room.available?'var(--success)':'var(--error)'}">${room.available ? `${ICONS.checkCircle} Available` : '&#10007; Unavailable'}</div>
+    <div class="detail-meta-item" style="color:${room.available?'var(--success)':'var(--error)'}">${room.available ? `${ICONS.checkCircle} Available` : '✕ Unavailable'}</div>
   </div>
 `;
 
@@ -171,11 +171,9 @@ function updateBreakdown(){
   const bd=document.getElementById('breakdown');
   if(n>0){
     const sub=room.price*n;
-    const fee=Math.round(sub*0.05);
-    const total=sub+fee;
+    const total=sub; // No service fee
     bd.innerHTML=`
-      <div class="price-row"><span>${formatKES(room.price)} &times; ${n} night${n>1?'s':''}</span><span>${formatKES(sub)}</span></div>
-      <div class="price-row"><span>Service fee (5%)</span><span>${formatKES(fee)}</span></div>
+      <div class="price-row"><span>${formatKES(room.price)} × ${n} night${n>1?'s':''}</span><span>${formatKES(sub)}</span></div>
       <div class="price-row total"><span>Total</span><span>${formatKES(total)}</span></div>
     `;
   } else { bd.innerHTML=''; }
@@ -191,7 +189,7 @@ function checkAvail(){
   const msg=document.getElementById('availMsg');
   if(!ci||!co){ msg.className='avail-msg err'; msg.textContent='Please select both dates.'; return; }
   if(new Date(co)<=new Date(ci)){ msg.className='avail-msg err'; msg.textContent='Check-out must be after check-in.'; return; }
-  msg.className='avail-msg ok'; msg.textContent='&#10003; Available! Proceeding to booking...';
+  msg.className='avail-msg ok'; msg.textContent='✓ Available! Proceeding to booking...';
   setTimeout(()=>{
     const n=calcNights(ci,co);
     window.location=`booking.html?id=${room.id}&checkin=${ci}&checkout=${co}&nights=${n}&guests=${document.getElementById('bGuests').value}`;
@@ -250,7 +248,7 @@ document.getElementById('reviewSection').innerHTML = `
   <div class="write-review">
     <h4>Leave a Review</h4>
     <div class="star-picker" id="starPicker">
-      ${[1,2,3,4,5].map(i=>`<button onclick="setStars(${i})" id="sp${i}">&#9733;</button>`).join('')}
+      ${[1,2,3,4,5].map(i=>`<button onclick="setStars(${i})" id="sp${i}">★</button>`).join('')}
     </div>
     <div class="form-group" style="margin-bottom:14px"><textarea class="form-control" id="reviewText" placeholder="Share your experience…"></textarea></div>
     <button class="btn btn-primary" onclick="submitReview()">Submit Review</button>
@@ -266,7 +264,7 @@ function submitReview(){
   const txt=document.getElementById('reviewText').value.trim();
   if(!selectedStars||!txt){ document.getElementById('reviewMsg').style.color='var(--error)'; document.getElementById('reviewMsg').textContent='Please select a rating and write a comment.'; return; }
   document.getElementById('reviewMsg').style.color='var(--success)';
-  document.getElementById('reviewMsg').textContent='&#10003; Thank you! Your review has been submitted.';
+  document.getElementById('reviewMsg').textContent='✓ Thank you! Your review has been submitted.';
   document.getElementById('reviewText').value=''; setStars(0);
 }
 </script>

@@ -1,8 +1,8 @@
 // ─── CONFIG ────────────────────────────────────────────────────
-// Auto-detect: localhost for dev, Railway URL for production
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+// Auto-detect backend URL
+const API_BASE = (window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1')
   ? 'http://localhost:8000'
-  : 'https://serenity-spot-production.up.railway.app'; // <- Your Railway URL
+  : 'https://serenity-spot-production.up.railway.app';
 
 // ─── ROOMS DATA ────────────────────────────────────────────────
 const ROOMS = [
@@ -283,7 +283,7 @@ function footerHTML(){
     </div>
   </div>
   <div class="footer-bottom">
-    <span>&copy; 2026 Serenity Spot. All rights reserved.</span>
+    <span>© 2026 Serenity Spot. All rights reserved.</span>
     <span>Built with &hearts; for Kenya</span>
   </div>
 </footer>`;
