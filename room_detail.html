@@ -131,7 +131,7 @@ document.getElementById('detailLeft').innerHTML = `
   <div class="detail-meta">
     <div class="detail-meta-item">${ICONS.users} Up to ${room.people} guests</div>
     <div class="detail-meta-item"><span class="rating-wrap">${renderStars(room.rating)}</span> ${room.rating} &middot; ${room.reviews} reviews</div>
-    <div class="detail-meta-item" style="color:${room.available?'var(--success)':'var(--error)'}">${room.available ? `${ICONS.checkCircle} Available` : '✕ Unavailable'}</div>
+    <div class="detail-meta-item" style="color:${room.available?'var(--success)':'var(--error)'}">${room.available ? `${ICONS.checkCircle} Available` : '&#10007; Unavailable'}</div>
   </div>
 `;
 
@@ -189,7 +189,7 @@ function checkAvail(){
   const msg=document.getElementById('availMsg');
   if(!ci||!co){ msg.className='avail-msg err'; msg.textContent='Please select both dates.'; return; }
   if(new Date(co)<=new Date(ci)){ msg.className='avail-msg err'; msg.textContent='Check-out must be after check-in.'; return; }
-  msg.className='avail-msg ok'; msg.textContent='✓ Available! Proceeding to booking...';
+  msg.className='avail-msg ok'; msg.textContent='Available! Proceeding to booking...';
   setTimeout(()=>{
     const n=calcNights(ci,co);
     window.location=`booking.html?id=${room.id}&checkin=${ci}&checkout=${co}&nights=${n}&guests=${document.getElementById('bGuests').value}`;
@@ -264,7 +264,7 @@ function submitReview(){
   const txt=document.getElementById('reviewText').value.trim();
   if(!selectedStars||!txt){ document.getElementById('reviewMsg').style.color='var(--error)'; document.getElementById('reviewMsg').textContent='Please select a rating and write a comment.'; return; }
   document.getElementById('reviewMsg').style.color='var(--success)';
-  document.getElementById('reviewMsg').textContent='✓ Thank you! Your review has been submitted.';
+  document.getElementById('reviewMsg').textContent='Thank you! Your review has been submitted.';
   document.getElementById('reviewText').value=''; setStars(0);
 }
 </script>

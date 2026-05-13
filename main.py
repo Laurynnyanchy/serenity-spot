@@ -691,11 +691,13 @@ async def stk_push(req: STKIn, db=Depends(get_db)):
         password, ts  = mpesa_password()
         phone         = normalize_phone(req.phone)
 
+        # Use CustomerBuyGoodsOnline for Till (6-digit), CustomerPayBillOnline for Paybill
+        txn_type = "CustomerBuyGoodsOnline" if len(str(MPESA_SHORTCODE)) == 6 else "CustomerPayBillOnline"
         payload = {
             "BusinessShortCode": MPESA_SHORTCODE,
             "Password": password, "Timestamp": ts,
-            "TransactionType": "CustomerPayBillOnline",
-            "Amount": req.amount,
+            "TransactionType": txn_type,
+            "Amount": int(req.amount),
             "PartyA": phone, "PartyB": MPESA_SHORTCODE, "PhoneNumber": phone,
             "CallBackURL": MPESA_CALLBACK_URL,
             "AccountReference": req.account_ref[:12],
@@ -721,10 +723,14 @@ async def stk_push(req: STKIn, db=Depends(get_db)):
             )
             return {"success": True, "checkout_request_id": cid, "merchant_request_id": mid}
         else:
-            raise HTTPException(400, data.get("errorMessage", "STK push failed"))
+            err_msg = data.get("errorMessage") or data.get("ResponseDescription") or "STK push failed"
+            err_code = data.get("ResponseCode","")
+            raise HTTPException(400, f"M-Pesa error ({err_code}): {err_msg}")
 
     except httpx.HTTPError as e:
-        raise HTTPException(502, f"Daraja error: {e}")
+        raise HTTPException(502, f"Daraja connection error: {e}")
+    except Exception as e:
+        raise HTTPException(500, f"STK push error: {str(e)}")
 
 
 @app.post("/api/mpesa/callback")
@@ -996,7 +1002,7 @@ async def admin_stats(db=Depends(get_db), _=Depends(require_admin)):
         "confirmed":        await q("SELECT COUNT(*) FROM bookings WHERE status IN ('confirmed','completed')"),
         "pending_bookings": await q("SELECT COUNT(*) FROM bookings WHERE status='pending'"),
         "total_revenue":    await q("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid'"),
-        "total_guests":     await q("SELECT COUNT(*) FROM users WHERE role='guest' AND is_active=1"),
+        "total_guests":     await q("SELECT COUNT(*) FROM users WHERE is_active=1"),
         "pending_reviews":  await q("SELECT COUNT(*) FROM reviews WHERE status='pending'"),
         "unread_messages":  await q("SELECT COUNT(*) FROM contact_messages WHERE is_read=0"),
         "available_rooms":  await q("SELECT COUNT(*) FROM rooms WHERE is_available=1"),

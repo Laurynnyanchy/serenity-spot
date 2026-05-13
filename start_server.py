@@ -6,10 +6,10 @@ Usage: python start_server.py
 import os, sys, subprocess, socket
 
 BOLD="\033[1m"; RED="\033[91m"; GREEN="\033[92m"; YELLOW="\033[93m"; CYAN="\033[96m"; RESET="\033[0m"
-def ok(m):   print(f"  {GREEN}✅ {m}{RESET}")
-def err(m):  print(f"  {RED}❌ {m}{RESET}")
-def warn(m): print(f"  {YELLOW}⚠️  {m}{RESET}")
-def info(m): print(f"  {CYAN}ℹ️  {m}{RESET}")
+def ok(m):   print(f"  {GREEN} {m}{RESET}")
+def err(m):  print(f"  {RED} {m}{RESET}")
+def warn(m): print(f"  {YELLOW}  {m}{RESET}")
+def info(m): print(f"  {CYAN}  {m}{RESET}")
 
 print(f"\n{BOLD}{'='*52}\n  Serenity Spot — Pre-flight Check\n{'='*52}{RESET}\n")
 errors = 0

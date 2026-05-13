@@ -101,11 +101,11 @@ input[type=range] { width:100%; accent-color:var(--gold); height:4px; }
     <div class="toolbar">
       <div class="results-count"><b id="rCount">4</b> rooms available</div>
       <div style="display:flex;gap:10px;align-items:center">
-        <button class="btn btn-ghost btn-sm mob-filter-btn" onclick="openSidebar()">⚙️ Filters</button>
+        <button class="btn btn-ghost btn-sm mob-filter-btn" onclick="openSidebar()">Filters</button>
         <select class="sort-sel" id="sortSel" onchange="applyFilters()">
           <option value="default">Sort: Default</option>
-          <option value="price-asc">Price: Low → High</option>
-          <option value="price-desc">Price: High → Low</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
           <option value="rating">Top Rated</option>
         </select>
       </div>

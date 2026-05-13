@@ -304,7 +304,7 @@ function showProcessing(title, msg, status){
   document.getElementById('procMsg').textContent = msg;
   const badge = document.getElementById('procStatusBadge');
   badge.className = 'proc-status '+status;
-  badge.textContent = status==='pending'?'Processing…':status==='success'?'✓ Confirmed':'✕ Failed';
+  badge.innerHTML = status==='pending'?'Processing&hellip;':status==='success'?'✓ Confirmed':'✕ Failed';
 }
 
 // ── Pre-fill card summary panel ───────────────────────────────

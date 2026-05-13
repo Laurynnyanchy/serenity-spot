@@ -162,7 +162,7 @@ async function sendMsg(){
   const btn     = document.getElementById('sendBtn');
 
   if(!name)               { err.textContent = 'Please enter your name.'; return; }
-  if(!email||!email.includes('@')) { err.textContent = 'Please enter a valid email.'; return; }
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email address.'; return; }
   if(!message)            { err.textContent = 'Please write a message.'; return; }
   err.textContent = '';
 
@@ -183,7 +183,7 @@ async function sendMsg(){
 
 function resetForm(){
   ['cName','cEmail','cPhone','cMessage'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('sendBtn').textContent = 'Send Message →';
+  document.getElementById('sendBtn').innerHTML = 'Send Message &rarr;';
   document.getElementById('sendBtn').classList.remove('btn-loading');
   document.getElementById('formWrap').style.display = 'block';
   document.getElementById('successMsg').style.display = 'none';
